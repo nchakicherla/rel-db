@@ -3,3 +3,6 @@
 
 # Objects
 *.o
+
+# Valgrind
+vgcore.*
