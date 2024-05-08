@@ -6,6 +6,9 @@ OS := $(shell uname)
 mkBinDir := $(shell mkdir -p bin)
 mkObjDir := $(shell mkdir -p obj)
 
+
+MAIN = 	./obj/main.o
+
 OBJS = 	./obj/pm_memory.o	\
 		./obj/pm_error.o 	\
 		./obj/pm_string.o 	\
@@ -17,14 +20,14 @@ else
 		valgrind --track-origins=yes ./bin/practice.run  
 endif
 
-final-link: $(OBJS) ./obj/main.o
-	$(CC) $(CFLAGS) $(OBJS) ./obj/main.o -o ./bin/practice.run
+final-link: $(OBJS) $(MAIN)
+	$(CC) $(CFLAGS) $(OBJS) $(MAIN) -o ./bin/practice.run
 
-./obj/%.o: ./%.c ./%.h ./pm_common.h
+./obj/%.o: ./src/%.c ./src/%.h ./src/pm_common.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
-./obj/main.o: ./main.c ./main.h
-	$(CC) $(CFLAGS) -c ./main.c -o ./obj/main.o
+main-build: ./src/main.c ./src/main.h
+	$(CC) $(CFLAGS) -c ./src/main.c -o ./obj/main.o
 
 obj-clean:
 	trash-put ./obj/*
