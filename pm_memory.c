@@ -1,7 +1,7 @@
-#include "memory.h"
+#include "pm_memory.h"
 
 void *
-wcalloc(size_t n, size_t size) {
+pm_calloc(size_t n, size_t size) {
 	void *ptr_out = NULL;
 	if(!(ptr_out = calloc(n, size))) {
 		exit(EXIT_FAILURE);
@@ -10,7 +10,7 @@ wcalloc(size_t n, size_t size) {
 }
 
 void *
-wrealloc(void *ptr, size_t size) {
+pm_realloc(void *ptr, size_t size) {
 	void *ptr_out = NULL;
 	if(!(ptr_out = realloc(ptr, size))) {
 		exit(EXIT_FAILURE);
