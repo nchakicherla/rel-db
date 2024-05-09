@@ -11,8 +11,5 @@ typedef struct PM_Message {
 	char* msg;
 	int32_t code;
 } *pm_msgR;
-/*
-pm_msg_ref
-pm_new_msg(char* fn, char* msg, int32_t code);
-*/
+
 #endif // PM_ERROR_H
