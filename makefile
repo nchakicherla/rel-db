@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Wpedantic -Werror
+CFLAGS = -std=c99 -Wall -Wpedantic -Werror
 LDFLAGS = #-lncurses
 OS := $(shell uname)
 
@@ -12,6 +12,7 @@ MAIN = 	./obj/main.o
 OBJS = 	./obj/pm_memory.o	\
 		./obj/pm_error.o 	\
 		./obj/pm_string.o 	\
+		./obj/pm_interpreter.o \
 
 final-run: final-link
 ifeq ($(OS),Darwin) 

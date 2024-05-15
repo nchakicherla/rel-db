@@ -7,10 +7,13 @@
 void *
 pm_calloc(size_t n, size_t size);
 
-void *
-pm_growalloc(void *ptr, size_t size);
+void
+pm_free(void *ptr);
 
 void *
-pm_shrinkalloc(void *ptr, size_t bytes);
+pm_grow_alloc(void *ptr, size_t size);
+
+void *
+pm_shrink_alloc(void *ptr, size_t bytes);
 
 #endif // PM_MEMORY_H
