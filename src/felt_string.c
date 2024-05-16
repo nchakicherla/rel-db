@@ -30,6 +30,16 @@ felt_str_chr(char *str, char chr, size_t len) {
 	return NULL;
 }
 
+char *
+felt_find_str_in_str_arr(char **arr, char *str) {
+	for (size_t i = 0; arr[i] != NULL; i++) {
+		if (felt_str_same(arr[i], str)) {
+			return arr[i];
+		}
+	}
+	return NULL;
+}
+
 bool
 felt_is_substr_at_addr(char* addr, char* substr) {
 	for (size_t i = 0; i < felt_str_len(substr); i++) {
@@ -66,7 +76,7 @@ felt_new_str_stdin(void) {
 }
 
 char **
-felt_new_split_str(char *str, char *delim) {
+felt_new_str_arr_split(char *str, char *delim) {
 	size_t num_toks = 1;
 	for (size_t i = 0; i < felt_str_len(str); i++) {
 		if (felt_is_substr_at_addr(&str[i], delim)) {

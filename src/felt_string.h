@@ -16,6 +16,9 @@ felt_str_dup(char *str);
 char *
 felt_str_chr(char *str, char c, size_t len);
 
+char *
+felt_find_str_in_str_arr(char **arr, char *str);
+
 bool
 felt_is_substr_at_addr(char* addr, char* substr);
 
@@ -26,7 +29,7 @@ char *
 felt_new_str_stdin(void);
 
 char **
-felt_new_split_str(char *str, char *delim);
+felt_new_str_arr_split(char *str, char *delim);
 
 void
 felt_free_split_str(char **split_str);

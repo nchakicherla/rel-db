@@ -19,7 +19,7 @@ final-run: final-link
 ifeq ($(OS),Darwin) 
 		./bin/practice.run
 else 
-		valgrind --track-origins=yes ./bin/practice.run  
+		valgrind --track-origins=yes --leak-check=full ./bin/practice.run  
 endif
 
 final-link: $(OBJS) $(MAIN)
