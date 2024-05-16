@@ -1,12 +1,15 @@
 #include "pm_db.h"
 
-size_t FIELD_SIZES[] = {16, 
-						sizeof(int32_t),
-						sizeof(int64_t),
-						sizeof(double),
-						sizeof(uint8_t) + sizeof(uint8_t) + sizeof(uint16_t),
-						sizeof(int64_t) + sizeof(uint8_t),
-						1024 };
+const size_t FIELD_SIZES[] = {	sizeof(uint32_t), //STR
+								sizeof(char),
+								sizeof(char *), 
+								sizeof(int32_t),
+								sizeof(int64_t),
+								sizeof(double) + sizeof(int16_t),
+								
+								sizeof(uint8_t) + sizeof(uint8_t) + sizeof(uint16_t),
+								sizeof(int64_t) + sizeof(uint8_t),
+								sizeof(char *) };
 
 pm_tabR
 pm_new_table(char* name, char* schema) {
@@ -23,6 +26,7 @@ pm_new_table(char* name, char* schema) {
 	for (size_t i = 0; schema_inputs[i] != NULL; i++) {
 		n_fields++;
 	}
+	table->n_cols = n_fields;
 	table->schema = pm_calloc(n_fields, sizeof(TABLE_FIELD_TYPE));
 	for (size_t i = 0; schema_inputs[i] != NULL; i++) {
 		if (pm_str_same(schema_inputs[i], "STR")) {
@@ -37,7 +41,10 @@ pm_new_table(char* name, char* schema) {
 		} else if (pm_str_same(schema_inputs[i], "FLT")) {
 			table->schema[i] = FLT;
 			table->n_bytes_row += FIELD_SIZES[FLT];
-		}  else if (pm_str_same(schema_inputs[i], "DATE")) {
+		} else if (pm_str_same(schema_inputs[i], "BLN")) {
+			table->schema[i] = BLN;
+			table->n_bytes_row += FIELD_SIZES[BLN];
+		} else if (pm_str_same(schema_inputs[i], "DATE")) {
 			table->schema[i] = DATE;
 			table->n_bytes_row += FIELD_SIZES[DATE];
 		} else if (pm_str_same(schema_inputs[i], "CURR")) {
@@ -47,20 +54,19 @@ pm_new_table(char* name, char* schema) {
 			table->schema[i] = TEXT;
 			table->n_bytes_row += FIELD_SIZES[TEXT];
 		} else {
-			pm_free_split_str(schema_inputs);
-			free(table->name);
-			free(table);
-			printf("INVALID TYPE PROVIDED!\n");
-			return NULL;
+			goto abort;
 		}
-		free(schema_inputs[i]);
-		printf("i: %zu, n_bytes_row: %zu\n", i, table->n_bytes_row);
 	}
-	free(schema_inputs);
-
-	table->n_cols = n_fields;
-
+	pm_free_split_str(schema_inputs);
 	return table;
+
+abort:
+	pm_free_split_str(schema_inputs);
+	free(table->name);
+	free(table->uuid);
+	free(table->schema);
+	free(table);
+	return NULL;
 }
 
 void

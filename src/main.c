@@ -12,7 +12,7 @@
 #include "pm_db.h"
 
 int main(void) {
-
+	/*
 	char *input = NULL;
 	while (!pm_str_same(input, "quit")) {
 		free(input);
@@ -26,12 +26,13 @@ int main(void) {
 	}
 
 	free(input);
-
+	*/
 	char *test = pm_new_str_from_file("test.txt");
 	free(test);
 
-	pm_tabR table = pm_new_table("My Table", "STR ITR32 ITR64 FLT DATE CURR TEXT");
-	pm_free_table(&table);
+	pm_tabR table = pm_new_table("My Table", "STR ITR32 ITR64 FLT DATE CURR TEXT BLN CH");
+	if (table)
+		pm_free_table(&table);
 
 	return 0;
 }

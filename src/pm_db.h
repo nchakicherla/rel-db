@@ -8,10 +8,14 @@
 #include "pm_string.h"
 
 typedef enum {
-	STR = 0,
+	ID = 0,
+	REF = 1,
+	STR,
+	CH,
 	ITR32,
 	ITR64,
 	FLT,
+	BLN,
 	DATE,
 	CURR,
 	TEXT,
