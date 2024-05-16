@@ -5,20 +5,24 @@
 #include <stdlib.h>
 #include <uuid/uuid.h>
 #include <stdbool.h>
+#include <errno.h>
+#include <limits.h>
+#include <locale.h>
+#include <math.h>
+#include <ctype.h>
 //#include <stdarg.h>
 
 #include "felt_string.h"
-
 // table->n_cols can't exceed SIZE_MAX - 1
 //
+#define NO_PRIMARY							SIZE_MAX
 
-#define NO_PRIMARY	SIZE_MAX
 
 typedef enum {
 	STR = 0,
 	ITR32,
 	ITR64,
-	FLT,
+	DBL,
 	BLN,
 	DATE,
 	CURR,
@@ -44,15 +48,15 @@ typedef struct Felt_Table {
 	size_t n_bytes_row;
 	size_t n_cols;
 	size_t n_rows;
-	void *data;
+	void *bytes;
 } *felt_tabR;
 
-typedef struct Felt_Reference {
+typedef struct Felt_Reference_Field {
 	char *db_uuid;
 	char *tab_uuid;
 	size_t row;
 	size_t col;
-} *felt_refR;
+} *felt_ref_fieldR;
 
 felt_tabR
 felt_new_table(char* label, size_t primary_index, char* schema);
@@ -67,6 +71,12 @@ int
 felt_update_table_column_labels(felt_tabR table, char **labels);
 
 int
-felt_insert_row(felt_tabR table, char *row);
+felt_insert_row_from_chars(felt_tabR table, char *row);
+
+int
+felt_set_row_input_valid_fns(void);
+
+int
+felt_set_write_row_field_fns(void);
 
 #endif // FELT_DB_H

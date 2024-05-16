@@ -42,9 +42,8 @@ int main(void) {
 	char *test = felt_new_str_from_file("test.txt");
 	free(test);
 
-	felt_tabR table = felt_new_table(	"My Table", 
-										NO_PRIMARY, 
-										"STR ITR32 ITR64 FLT DATE CURR BLN CH");
+	felt_tabR table = felt_new_table(	"My Table", 0, 
+										"STR ITR32 ITR64 DBL BLN DATE CURR CH");
 	
 	if (table) {
 		felt_update_table_column_labels(table, TABLE_TEST_COLUMN_LABELS);
@@ -54,7 +53,12 @@ int main(void) {
 			}
 			printf("%zu: %s\n", i, table->col_labels[i]);
 		}
-		felt_insert_row(table, "test row");
+		int ret = felt_insert_row_from_chars(table, "test,32,64,7.2,true,3-3-2023,52.43,k");
+		if (ret) {
+			printf("failed!\n");
+		} else {
+			printf("passed!\n");
+		}
 		felt_free_table(&table);
 	}
 

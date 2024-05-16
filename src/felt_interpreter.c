@@ -5,7 +5,7 @@ typedef enum
 {
 	END = 0,
 	INT,
-	FLT,
+	DBL,
 	STR,
 } FELT_TOK_TYPE;
 
@@ -20,4 +20,3 @@ felt_new_tok(PM_TOK_TYPE type, void *data) {
 
 }
 */
-
