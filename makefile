@@ -1,6 +1,5 @@
 CC = gcc
-CFLAGS = -std=c99 -Wall -Wpedantic -Werror
-LDFLAGS = #-lncurses
+CFLAGS = -std=c99 -Wall -Wpedantic -Werror -luuid
 OS := $(shell uname)
 
 mkBinDir := $(shell mkdir -p bin)
@@ -9,11 +8,12 @@ mkObjDir := $(shell mkdir -p obj)
 
 MAIN = 	./obj/main.o
 
-OBJS = 	./obj/pm_memory.o	\
-		./obj/pm_error.o 	\
-		./obj/pm_string.o 	\
-		./obj/pm_interpreter.o \
-		./obj/pm_file.o
+OBJS = 	./obj/pm_memory.o		\
+		./obj/pm_error.o 		\
+		./obj/pm_string.o 		\
+		./obj/pm_interpreter.o 	\
+		./obj/pm_file.o 		\
+		./obj/pm_db.o 			\
 
 final-run: final-link
 ifeq ($(OS),Darwin) 
@@ -30,7 +30,6 @@ final-link: $(OBJS) $(MAIN)
 
 ./obj/main.o: ./src/main.c
 	$(CC) $(CFLAGS) -c ./src/main.c -o ./obj/main.o
-
 clean: obj-clean
 	trash-put ./bin/*
 

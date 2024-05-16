@@ -22,13 +22,13 @@ typedef struct PM_Message {
 pm_maybeR
 pm_new_maybe(int32_t code, void* data);
 
+pm_msgR
+pm_new_message(int32_t code, char* msg, char* fn);
+
 void
 pm_free_maybe(pm_maybeR *pm_maybeRR);
 
-pm_msgR
-pm_new_msg(int32_t code, char* msg, char* fn);
-
 void
-pm_free_msg(pm_msgR *pm_msgRR);
+pm_free_message(pm_msgR *pm_msgRR);
 
 #endif // PM_ERROR_H

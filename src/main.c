@@ -9,6 +9,7 @@
 #include "pm_string.h"
 #include "pm_interpreter.h"
 #include "pm_file.h"
+#include "pm_db.h"
 
 int main(void) {
 
@@ -28,5 +29,9 @@ int main(void) {
 
 	char *test = pm_new_str_from_file("test.txt");
 	free(test);
+
+	pm_tabR table = pm_new_table("My Table", "STR ITR32 ITR64 FLT DATE CURR TEXT");
+	pm_free_table(&table);
+
 	return 0;
 }

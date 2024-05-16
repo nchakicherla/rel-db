@@ -8,7 +8,7 @@
 #include "pm_memory.h"
 
 size_t
-pm_str_len(const char *str);
+pm_str_len(char *str);
 
 char *
 pm_str_dup(char *str);
@@ -27,5 +27,8 @@ pm_new_str_stdin(void);
 
 char **
 pm_new_split_str(char *str, char *delim);
+
+void
+pm_free_split_str(char **split_str);
 
 #endif // PM_STRING_H

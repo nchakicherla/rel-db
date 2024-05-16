@@ -1,7 +1,7 @@
 #include "pm_string.h"
 
 size_t
-pm_str_len(const char* str) {
+pm_str_len(char* str) {
 	size_t len = 0;
 	for (size_t i = 0; str[i] != '\0'; i++) {
 		len++;
@@ -42,9 +42,11 @@ pm_is_substr_at_addr(char* addr, char* substr) {
 
 bool
 pm_str_same(char *str, char *cmp) {
-	if (!str || !cmp) return false;
-	if (str[0] != cmp[0]) return false;
-	for (size_t i = 1; str[i] != '\0'; i++) {
+	if (!str || !cmp)
+		return false;
+	if (str[0] != cmp[0])
+		return false;
+	for (size_t i = 1; str[i - 1] != '\0'; i++) {
 		if(str[i] != cmp[i])
 			return false;
 	}
@@ -93,4 +95,13 @@ pm_new_split_str(char *str, char *delim) {
 	}
 
 	return output;
+}
+
+void
+pm_free_split_str(char **split_str) {
+	for (size_t i = 0; split_str[i] != NULL; i++) {
+		free(split_str[i]);
+	}
+	free(split_str);
+	return;
 }

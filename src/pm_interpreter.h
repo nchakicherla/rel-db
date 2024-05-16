@@ -9,10 +9,10 @@
 
 typedef enum
 {
-	INT,
-	FLT,
-	STR,
-	OPR,
+	TOK_INT,
+	TOK_FLT,
+	TOK_STR,
+	TOK_OPR,
 } PM_TOK_TYPE;
 
 typedef struct PM_Token {
