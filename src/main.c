@@ -3,13 +3,13 @@
 #include <stdbool.h>
 #include <signal.h>
 
-#include "felt_common.h"
-#include "felt_memory.h"
-#include "felt_error.h"
-#include "felt_string.h"
-#include "felt_interpreter.h"
-#include "felt_file.h"
-#include "felt_db.h"
+#include "teal_common.h"
+#include "teal_memory.h"
+#include "teal_error.h"
+#include "teal_string.h"
+#include "teal_interpreter.h"
+#include "teal_file.h"
+#include "teal_db.h"
 
 char *TABLE_TEST_COLUMN_LABELS[] = 
 
@@ -26,10 +26,10 @@ char *TABLE_TEST_COLUMN_LABELS[] =
 int main(void) {
 	/*
 	char *input = NULL;
-	while (!felt_str_same(input, "quit")) {
+	while (!teal_str_same(input, "quit")) {
 		free(input);
-		input = felt_new_str_stdin();
-		char **split_input = felt_new_str_arr_split(input, " ");
+		input = teal_new_str_stdin();
+		char **split_input = teal_new_str_arr_split(input, " ");
 		for (size_t i = 0; split_input[i] != NULL; i++) {
 			printf("|%s|\n", split_input[i]);
 			free(split_input[i]);
@@ -39,27 +39,27 @@ int main(void) {
 
 	free(input);
 	*/
-	char *test = felt_new_str_from_file("test.txt");
+	char *test = teal_new_str_from_file("test.txt");
 	free(test);
 
-	felt_tabR table = felt_new_table(	"My Table", 0, 
+	teal_tabR table = teal_new_table(	"My Table", 0, 
 										"STR ITR32 ITR64 DBL BLN DATE CURR CH");
 	
 	if (table) {
-		felt_update_table_column_labels(table, TABLE_TEST_COLUMN_LABELS);
+		teal_update_table_column_labels(table, TABLE_TEST_COLUMN_LABELS);
 		for (size_t i = 0; i < table->n_cols; i++) {
 			if(table->primary_specified && i == table->primary) {
 				printf("*");
 			}
 			printf("%zu: %s\n", i, table->col_labels[i]);
 		}
-		int ret = felt_insert_row_from_chars(table, "test,32,64,7.2,true,3-3-2023,52.43,k");
+		int ret = teal_insert_row_from_chars(table, "test,32,64,7.2,true,3-3-2023,52.43,k");
 		if (ret) {
 			printf("failed!\n");
 		} else {
 			printf("passed!\n");
 		}
-		felt_free_table(&table);
+		teal_free_table(&table);
 	}
 
 	return 0;

@@ -1,4 +1,4 @@
-#include "felt_interpreter.h"
+#include "teal_interpreter.h"
 
 /*
 typedef enum
@@ -12,11 +12,11 @@ typedef enum
 typedef struct PM_Token {
 	FELT_TOK_TYPE type;
 	void *data;
-} *felt_tokR;
+} *teal_tokR;
 */
 /*
-felt_tokR
-felt_new_tok(PM_TOK_TYPE type, void *data) {
+teal_tokR
+teal_new_tok(PM_TOK_TYPE type, void *data) {
 
 }
 */

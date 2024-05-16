@@ -12,7 +12,7 @@
 #include <ctype.h>
 //#include <stdarg.h>
 
-#include "felt_string.h"
+#include "teal_string.h"
 // table->n_cols can't exceed SIZE_MAX - 1
 //
 #define NO_PRIMARY							SIZE_MAX
@@ -31,14 +31,14 @@ typedef enum {
 	REF,
 } TABLE_FIELD_TYPE;
 
-typedef struct Felt_Database {
+typedef struct Teal_Database {
 	char *label;
 	char *uuid;
 	size_t n_tables;
-	struct Felt_Table *tables;
-} *felt_dbR;
+	struct Teal_Table *tables;
+} *teal_dbR;
 
-typedef struct Felt_Table {
+typedef struct Teal_Table {
 	char *label;
 	char *uuid;
 	TABLE_FIELD_TYPE *schema;
@@ -49,34 +49,34 @@ typedef struct Felt_Table {
 	size_t n_cols;
 	size_t n_rows;
 	void *bytes;
-} *felt_tabR;
+} *teal_tabR;
 
-typedef struct Felt_Reference_Field {
+typedef struct Teal_Reference_Field {
 	char *db_uuid;
 	char *tab_uuid;
 	size_t row;
 	size_t col;
-} *felt_ref_fieldR;
+} *teal_ref_fieldR;
 
-felt_tabR
-felt_new_table(char* label, size_t primary_index, char* schema);
+teal_tabR
+teal_new_table(char* label, size_t primary_index, char* schema);
 
 void
-felt_free_table(felt_tabR *felt_tabRR);
+teal_free_table(teal_tabR *teal_tabRR);
 /*
 int
-felt_update_table_column_labelsV(int count, ...);
+teal_update_table_column_labelsV(int count, ...);
 */
 int
-felt_update_table_column_labels(felt_tabR table, char **labels);
+teal_update_table_column_labels(teal_tabR table, char **labels);
 
 int
-felt_insert_row_from_chars(felt_tabR table, char *row);
+teal_insert_row_from_chars(teal_tabR table, char *row);
 
 int
-felt_set_row_input_valid_fns(void);
+teal_set_row_input_valid_fns(void);
 
 int
-felt_set_write_row_field_fns(void);
+teal_set_write_row_field_fns(void);
 
 #endif // FELT_DB_H
