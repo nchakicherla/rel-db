@@ -1,5 +1,5 @@
-#ifndef Teal_INTERPRETER_H
-#define Teal_INTERPRETER_H
+#ifndef TEAL_INTERPRETER_H
+#define TEAL_INTERPRETER_H
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -23,4 +23,4 @@ typedef struct teal_Token {
 teal_tokR
 teal_new_tok(FELT_TOK_TYPE type, void *data);
 
-#endif // Teal_INTERPRETER_H
+#endif // TEAL_INTERPRETER_H

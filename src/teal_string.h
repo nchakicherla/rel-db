@@ -1,5 +1,5 @@
-#ifndef FELT_STRING_H
-#define FELT_STRING_H
+#ifndef TEAL_STRING_H
+#define TEAL_STRING_H
 
 #include <stddef.h>
 #include <stdio.h>
@@ -34,4 +34,4 @@ teal_new_str_arr_split(char *str, char *delim);
 void
 teal_free_split_str(char **split_str);
 
-#endif // FELT_STRING_H
+#endif // TEAL_STRING_H

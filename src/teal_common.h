@@ -1,4 +1,4 @@
-#ifndef FELT_COMMON_H
-#define FELT_COMMON_H
+#ifndef TEAL_COMMON_H
+#define TEAL_COMMON_H
 
-#endif // FELT_COMMON_H
+#endif // TEAL_COMMON_H

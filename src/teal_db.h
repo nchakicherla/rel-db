@@ -1,5 +1,5 @@
-#ifndef FELT_DB_H
-#define FELT_DB_H
+#ifndef TEAL_DB_H
+#define TEAL_DB_H
 
 #include <stdint.h>
 #include <stdlib.h>
@@ -79,4 +79,4 @@ teal_set_row_input_valid_fns(void);
 int
 teal_set_write_row_field_fns(void);
 
-#endif // FELT_DB_H
+#endif // TEAL_DB_H

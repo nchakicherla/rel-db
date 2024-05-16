@@ -1,5 +1,5 @@
-#ifndef FELT_ERROR_H
-#define FELT_ERROR_H
+#ifndef TEAL_ERROR_H
+#define TEAL_ERROR_H
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -31,4 +31,4 @@ teal_free_maybe(teal_maybeR *teal_maybeRR);
 void
 teal_free_message(teal_msgR *teal_msgRR);
 
-#endif // FELT_ERROR_H
+#endif // TEAL_ERROR_H
