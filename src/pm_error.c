@@ -32,7 +32,7 @@ pm_free_maybe(pm_maybeR *pm_maybeRR) {
 }
 
 pm_msgR
-pm_new_msg(int32_t code, char* msg, const char* fn) {
+pm_new_msg(int32_t code, char* msg, char* fn) {
 	pm_msgR new_msg = pm_calloc(1, sizeof(struct PM_Message));
 	new_msg->code = code;
 	new_msg->msg = pm_str_dup(msg);

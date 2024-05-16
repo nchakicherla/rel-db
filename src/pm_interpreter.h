@@ -9,7 +9,6 @@
 
 typedef enum
 {
-	END = 0,
 	INT,
 	FLT,
 	STR,

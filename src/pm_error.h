@@ -26,7 +26,7 @@ void
 pm_free_maybe(pm_maybeR *pm_maybeRR);
 
 pm_msgR
-pm_new_msg(int32_t code, char* msg, const char* fn);
+pm_new_msg(int32_t code, char* msg, char* fn);
 
 void
 pm_free_msg(pm_msgR *pm_msgRR);

@@ -13,6 +13,7 @@ OBJS = 	./obj/pm_memory.o	\
 		./obj/pm_error.o 	\
 		./obj/pm_string.o 	\
 		./obj/pm_interpreter.o \
+		./obj/pm_file.o
 
 final-run: final-link
 ifeq ($(OS),Darwin) 

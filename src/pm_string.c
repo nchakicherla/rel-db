@@ -10,7 +10,7 @@ pm_str_len(const char* str) {
 }
 
 char *
-pm_str_dup(const char* str) {
+pm_str_dup(char* str) {
 	size_t len = pm_str_len(str);
 	char *new_str = pm_calloc(len + 1, sizeof(char));
 	for (size_t i = 0; i < len; i++) {
@@ -41,9 +41,10 @@ pm_is_substr_at_addr(char* addr, char* substr) {
 }
 
 bool
-pm_str_cmp(char *str, char *cmp) {
+pm_str_same(char *str, char *cmp) {
 	if (!str || !cmp) return false;
-	for (size_t i = 0; str[i] != '\0'; i++) {
+	if (str[0] != cmp[0]) return false;
+	for (size_t i = 1; str[i] != '\0'; i++) {
 		if(str[i] != cmp[i])
 			return false;
 	}
@@ -51,13 +52,10 @@ pm_str_cmp(char *str, char *cmp) {
 }
 
 char *
-pm_new_str_f_stdin(char* prompt) {
+pm_new_str_stdin(void) {
 	const size_t buff_len = 256;
 	char *input = pm_calloc(buff_len, sizeof(char));
 	char *end = NULL;
-	if (prompt) {
-		printf("%s", prompt);
-	}
 	while (!(end = pm_str_chr(input, '\n', buff_len))) {
 		input = fgets(input, buff_len, stdin);
 	}
@@ -67,17 +65,15 @@ pm_new_str_f_stdin(char* prompt) {
 
 char **
 pm_new_split_str(char *str, char *delim) {
-	char **output = NULL;
-	size_t len = pm_str_len(str);
 	size_t num_toks = 1;
-	for (size_t i = 0; i < len; i++) {
+	for (size_t i = 0; i < pm_str_len(str); i++) {
 		if (pm_is_substr_at_addr(&str[i], delim)) {
 			num_toks++;
 			i += pm_str_len(delim) - 1;
 		}
 	}
-	output = pm_calloc(num_toks + 1, sizeof(char *));
-	output[num_toks] = NULL; // set sentinel
+	char **output = pm_calloc(num_toks + 1, sizeof(char *));
+	output[num_toks] = NULL;
 
 	char* start = str;
 	char* end = str;

@@ -11,7 +11,7 @@ size_t
 pm_str_len(const char *str);
 
 char *
-pm_str_dup(const char *str);
+pm_str_dup(char *str);
 
 char *
 pm_str_chr(char *str, char c, size_t len);
@@ -20,10 +20,10 @@ bool
 pm_is_substr_at_addr(char* addr, char* substr);
 
 bool
-pm_str_cmp(char *str, char *cmp);
+pm_str_same(char *str, char *cmp);
 
 char *
-pm_new_str_f_stdin(char* prompt);
+pm_new_str_stdin(void);
 
 char **
 pm_new_split_str(char *str, char *delim);
