@@ -1,7 +1,7 @@
-#include "pm_memory.h"
+#include "felt_memory.h"
 
 void *
-pm_calloc(size_t n, size_t size) {
+felt_calloc(size_t n, size_t size) {
 	void *ptr_out = NULL;
 	if(!(ptr_out = calloc(n, size))) {
 		exit(EXIT_FAILURE);
@@ -10,14 +10,14 @@ pm_calloc(size_t n, size_t size) {
 }
 
 void
-pm_free(void *ptr) {
+felt_free(void *ptr) {
 	if (!ptr) return;
 	free(ptr);
 	return;
 }
 
 void *
-pm_grow_alloc(void *ptr, size_t bytes) {
+felt_grow_alloc(void *ptr, size_t bytes) {
 	void *ptr_out = NULL;
 	if(!(ptr_out = realloc(ptr, bytes))) {
 		exit(EXIT_FAILURE);
@@ -26,8 +26,8 @@ pm_grow_alloc(void *ptr, size_t bytes) {
 }
 
 void *
-pm_shrink_alloc(void *ptr, size_t bytes) {
-	void *ptr_out = pm_calloc(bytes, 1);
+felt_shrink_alloc(void *ptr, size_t bytes) {
+	void *ptr_out = felt_calloc(bytes, 1);
 	memcpy(ptr_out, ptr, bytes);
 	free(ptr);
 	return ptr_out;

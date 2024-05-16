@@ -3,21 +3,21 @@
 #include <stdbool.h>
 #include <signal.h>
 
-#include "pm_common.h"
-#include "pm_memory.h"
-#include "pm_error.h"
-#include "pm_string.h"
-#include "pm_interpreter.h"
-#include "pm_file.h"
-#include "pm_db.h"
+#include "felt_common.h"
+#include "felt_memory.h"
+#include "felt_error.h"
+#include "felt_string.h"
+#include "felt_interpreter.h"
+#include "felt_file.h"
+#include "felt_db.h"
 
 int main(void) {
 	/*
 	char *input = NULL;
-	while (!pm_str_same(input, "quit")) {
+	while (!felt_str_same(input, "quit")) {
 		free(input);
-		input = pm_new_str_stdin();
-		char **split_input = pm_new_split_str(input, " ");
+		input = felt_new_str_stdin();
+		char **split_input = felt_new_split_str(input, " ");
 		for (size_t i = 0; split_input[i] != NULL; i++) {
 			printf("|%s|\n", split_input[i]);
 			free(split_input[i]);
@@ -27,12 +27,12 @@ int main(void) {
 
 	free(input);
 	*/
-	char *test = pm_new_str_from_file("test.txt");
+	char *test = felt_new_str_from_file("test.txt");
 	free(test);
 
-	pm_tabR table = pm_new_table("My Table", "STR ITR32 ITR64 FLT DATE CURR TEXT BLN CH");
+	felt_tabR table = felt_new_table("My Table", "STR ITR32 ITR64 FLT DATE CURR TEXT BLN CH");
 	if (table)
-		pm_free_table(&table);
+		felt_free_table(&table);
 
 	return 0;
 }

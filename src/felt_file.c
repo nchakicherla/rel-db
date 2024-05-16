@@ -1,7 +1,7 @@
-#include "pm_file.h"
+#include "felt_file.h"
 
 char *
-pm_new_str_from_file(char *name) {
+felt_new_str_from_file(char *name) {
 	FILE* file = NULL;
 	char *output = NULL;
 	long size;
@@ -14,7 +14,7 @@ pm_new_str_from_file(char *name) {
 	size = ftell(file);
 	fseek(file, 0, SEEK_SET);
 	
-	output = pm_calloc(size + 1, sizeof(char));
+	output = felt_calloc(size + 1, sizeof(char));
 	fread(output, size, 1, file);
 	output[size] = '\0';
 	

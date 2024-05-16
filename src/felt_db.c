@@ -1,4 +1,4 @@
-#include "pm_db.h"
+#include "felt_db.h"
 
 const size_t FIELD_SIZES[] = {	sizeof(uint32_t), //STR
 								sizeof(char),
@@ -6,62 +6,70 @@ const size_t FIELD_SIZES[] = {	sizeof(uint32_t), //STR
 								sizeof(int32_t),
 								sizeof(int64_t),
 								sizeof(double) + sizeof(int16_t),
-								
+
 								sizeof(uint8_t) + sizeof(uint8_t) + sizeof(uint16_t),
 								sizeof(int64_t) + sizeof(uint8_t),
 								sizeof(char *) };
 
-pm_tabR
-pm_new_table(char* name, char* schema) {
-	pm_tabR table = pm_calloc(1, sizeof(struct PM_Table));
-	table->name = pm_str_dup(name);
+felt_tabR
+felt_new_table(char* name, char* schema) {
+	felt_tabR table = felt_calloc(1, sizeof(struct Felt_Table));
+	table->name = felt_str_dup(name);
 
 	uuid_t bin_uuid;
 	uuid_generate_random(bin_uuid);
-	table->uuid = pm_calloc(UUID_STR_LEN + 1, sizeof(char));
+	table->uuid = felt_calloc(UUID_STR_LEN + 1, sizeof(char));
 	uuid_unparse_upper(bin_uuid, table->uuid);
 
-	char **schema_inputs = pm_new_split_str(schema, " ");
+	char **schema_inputs = felt_new_split_str(schema, " ");
 	size_t n_fields = 0;
 	for (size_t i = 0; schema_inputs[i] != NULL; i++) {
 		n_fields++;
 	}
 	table->n_cols = n_fields;
-	table->schema = pm_calloc(n_fields, sizeof(TABLE_FIELD_TYPE));
+	table->schema = felt_calloc(n_fields, sizeof(TABLE_FIELD_TYPE));
 	for (size_t i = 0; schema_inputs[i] != NULL; i++) {
-		if (pm_str_same(schema_inputs[i], "STR")) {
+		if (felt_str_same(schema_inputs[i], "STR")) {
 			table->schema[i] = STR;
 			table->n_bytes_row += FIELD_SIZES[STR];
-		} else if (pm_str_same(schema_inputs[i], "ITR32")) {
+		} 
+		else if (felt_str_same(schema_inputs[i], "ITR32")) {
 			table->schema[i] = ITR32;
 			table->n_bytes_row += FIELD_SIZES[ITR32];
-		} else if (pm_str_same(schema_inputs[i], "ITR64")) {
+		} 
+		else if (felt_str_same(schema_inputs[i], "ITR64")) {
 			table->schema[i] = ITR64;
 			table->n_bytes_row += FIELD_SIZES[ITR64];
-		} else if (pm_str_same(schema_inputs[i], "FLT")) {
+		} 
+		else if (felt_str_same(schema_inputs[i], "FLT")) {
 			table->schema[i] = FLT;
 			table->n_bytes_row += FIELD_SIZES[FLT];
-		} else if (pm_str_same(schema_inputs[i], "BLN")) {
+		} 
+		else if (felt_str_same(schema_inputs[i], "BLN")) {
 			table->schema[i] = BLN;
 			table->n_bytes_row += FIELD_SIZES[BLN];
-		} else if (pm_str_same(schema_inputs[i], "DATE")) {
+		} 
+		else if (felt_str_same(schema_inputs[i], "DATE")) {
 			table->schema[i] = DATE;
 			table->n_bytes_row += FIELD_SIZES[DATE];
-		} else if (pm_str_same(schema_inputs[i], "CURR")) {
+		} 
+		else if (felt_str_same(schema_inputs[i], "CURR")) {
 			table->schema[i] = CURR;
 			table->n_bytes_row += FIELD_SIZES[CURR];
-		} else if (pm_str_same(schema_inputs[i], "TEXT")) {
+		} 
+		else if (felt_str_same(schema_inputs[i], "TEXT")) {
 			table->schema[i] = TEXT;
 			table->n_bytes_row += FIELD_SIZES[TEXT];
-		} else {
+		} 
+		else {
 			goto abort;
 		}
 	}
-	pm_free_split_str(schema_inputs);
+	felt_free_split_str(schema_inputs);
 	return table;
 
 abort:
-	pm_free_split_str(schema_inputs);
+	felt_free_split_str(schema_inputs);
 	free(table->name);
 	free(table->uuid);
 	free(table->schema);
@@ -70,12 +78,12 @@ abort:
 }
 
 void
-pm_free_table(pm_tabR *pm_tabRR) {
-	free((*pm_tabRR)->name);
-	free((*pm_tabRR)->uuid);
-	free((*pm_tabRR)->schema);
-	free((*pm_tabRR)->data);
-	free(*pm_tabRR);
-	*pm_tabRR = NULL;
+felt_free_table(felt_tabR *felt_tabRR) {
+	free((*felt_tabRR)->name);
+	free((*felt_tabRR)->uuid);
+	free((*felt_tabRR)->schema);
+	free((*felt_tabRR)->data);
+	free(*felt_tabRR);
+	*felt_tabRR = NULL;
 	return;
 }

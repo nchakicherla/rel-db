@@ -1,11 +1,11 @@
-#ifndef PM_DB_H
-#define PM_DB_H
+#ifndef FELT_DB_H
+#define FELT_DB_H
 
 #include <stdint.h>
 #include <stdlib.h>
 #include <uuid/uuid.h>
 
-#include "pm_string.h"
+#include "felt_string.h"
 
 typedef enum {
 	ID = 0,
@@ -21,14 +21,14 @@ typedef enum {
 	TEXT,
 } TABLE_FIELD_TYPE;
 
-typedef struct PM_Database {
+typedef struct Felt_Database {
 	char *name;
 	char *uuid;
 	size_t n_tables;
-	struct PM_Table *tables;
-} *pm_dbR;
+	struct Felt_Table *tables;
+} *felt_dbR;
 
-typedef struct PM_Table {
+typedef struct Felt_Table {
 	char *name;
 	char *uuid;
 	TABLE_FIELD_TYPE *schema;
@@ -36,12 +36,12 @@ typedef struct PM_Table {
 	size_t n_cols;
 	size_t n_rows;
 	void *data;
-} *pm_tabR;
+} *felt_tabR;
 
-pm_tabR
-pm_new_table(char* name, char* schema);
+felt_tabR
+felt_new_table(char* name, char* schema);
 
 void
-pm_free_table(pm_tabR *pm_tabRR);
+felt_free_table(felt_tabR *felt_tabRR);
 
-#endif // PM_DB_H
+#endif // FELT_DB_H
