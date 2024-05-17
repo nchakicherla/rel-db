@@ -5,7 +5,6 @@ OS := $(shell uname)
 mkBinDir := $(shell mkdir -p bin)
 mkObjDir := $(shell mkdir -p obj)
 
-
 MAIN = 	./obj/main.o
 
 OBJS = 	./obj/teal_memory.o		\
@@ -15,7 +14,7 @@ OBJS = 	./obj/teal_memory.o		\
 		./obj/teal_file.o 		\
 		./obj/teal_db.o 			\
 
-final-run: final-link
+run: final-link
 ifeq ($(OS),Darwin) 
 		./bin/practice.run
 else 
@@ -30,9 +29,9 @@ final-link: $(OBJS) $(MAIN)
 
 ./obj/main.o: ./src/main.c
 	$(CC) $(CFLAGS) -c ./src/main.c -o ./obj/main.o
-	
-clean: obj-clean
-	trash-put ./bin/*
 
-obj-clean:
+clean-obj:
 	trash-put ./obj/*
+	
+clean: clean-obj
+	trash-put ./bin/*

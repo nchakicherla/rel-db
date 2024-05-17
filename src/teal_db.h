@@ -10,13 +10,13 @@
 #include <locale.h>
 #include <math.h>
 #include <ctype.h>
+#include <stddef.h>
 //#include <stdarg.h>
 
 #include "teal_string.h"
 // table->n_cols can't exceed SIZE_MAX - 1
 //
 #define NO_PRIMARY							SIZE_MAX
-
 
 typedef enum {
 	STR = 0,
@@ -27,8 +27,8 @@ typedef enum {
 	DATE,
 	CURR,
 	CH,
-	ID,
 	REF,
+	ROW_ID,
 } TABLE_FIELD_TYPE;
 
 typedef struct Teal_Database {
@@ -52,21 +52,18 @@ typedef struct Teal_Table {
 } *teal_tabR;
 
 typedef struct Teal_Reference_Field {
-	char *db_uuid;
+	//char *db_uuid;
 	char *tab_uuid;
 	size_t row;
 	size_t col;
-} *teal_ref_fieldR;
+} teal_ref_field;
 
 teal_tabR
 teal_new_table(char* label, size_t primary_index, char* schema);
 
 void
 teal_free_table(teal_tabR *teal_tabRR);
-/*
-int
-teal_update_table_column_labelsV(int count, ...);
-*/
+
 int
 teal_update_table_column_labels(teal_tabR table, char **labels);
 

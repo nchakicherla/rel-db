@@ -4,8 +4,11 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 #include "teal_memory.h"
+
+#define ARR_INDEX_OOB		SIZE_MAX
 
 size_t
 teal_str_len(char *str);
@@ -16,7 +19,7 @@ teal_str_dup(char *str);
 char *
 teal_str_chr(char *str, char c, size_t len);
 
-char *
+size_t
 teal_find_str_in_str_arr(char **arr, char *str);
 
 bool
@@ -29,7 +32,7 @@ char *
 teal_new_str_stdin(void);
 
 char **
-teal_new_str_arr_split(char *str, char *delim);
+teal_new_str_arr_split(char *str, char *delim, size_t *count);
 
 void
 teal_free_split_str(char **split_str);

@@ -1,10 +1,10 @@
 #include "teal_db.h"
 
-#define FELT_STR_TYPE_MAX_LEN 				512
+#define TEAL_STR_TYPE_MAX_LEN 				512
 
 
-bool teal_row_input_valid_fns_set=false;
-bool teal_write_row_field_fns_set=false;
+bool teal_field_input_valid_ptrs_set=false;
+bool teal_write_field_input_ptrs_set=false;
 
 char *TABLE_FIELD_TYPE_NAMES[] = 
 
@@ -16,8 +16,8 @@ char *TABLE_FIELD_TYPE_NAMES[] =
 				"DATE",
 				"CURR",
 				"CH",
-				"ID",
 				"REF",
+				"ROW_ID",
 				NULL };
 
 const size_t TABLE_FIELD_TYPE_SIZES[] = 
@@ -30,8 +30,14 @@ const size_t TABLE_FIELD_TYPE_SIZES[] =
 				sizeof(uint8_t) + sizeof(uint8_t) + sizeof(uint16_t),
 				sizeof(int64_t) + sizeof(uint8_t),
 				sizeof(char), // CH
-				sizeof(char *), 
-				sizeof(struct Teal_Reference_Field)  };
+				// NOT YET IMPLEMENTED
+				//
+				//
+				//
+				sizeof(size_t),
+				//
+				//
+				sizeof(teal_ref_field) };
 
 void
 teal_free_table(teal_tabR *teal_tabRR) {
@@ -47,34 +53,7 @@ teal_free_table(teal_tabR *teal_tabRR) {
 	*teal_tabRR = NULL;
 	return;
 }
-/*
-int
-teal_update_table_column_labelsV(int count, ...) {
-	va_list args;
-	va_start(args, count);
-	teal_tabR table = va_arg(args, struct Teal_Table *);
-	printf("here2\n");
-	printf("%zu\n", table->n_cols);
-	char *tmp = NULL;
-	for (int i = 1; i < count + 1; i++) {
-		printf("%d\n", i);
-		if (!(tmp = teal_str_dup(va_arg(args, char *)))) {
-			goto cancel;
-		}
-		printf("%s\n", tmp);
-		printf("here\n");
-		table->col_labels[i - 1] = tmp;
-		tmp = NULL;
-	}
-	return 0;
 
-cancel:
-	for (int j = 0; j < count; j++) {
-		teal_free(table->col_labels[j]);
-	}
-	return 1;
-}
-*/
 int
 teal_update_table_column_labels(teal_tabR table, char **labels) {
 	for (size_t i = 0; i < table->n_cols; i++) {
@@ -82,7 +61,7 @@ teal_update_table_column_labels(teal_tabR table, char **labels) {
 	}
 	return 0;
 }
-
+/*
 bool teal_row_input_valid_STR(char *value);
 bool teal_row_input_valid_ITR32(char *value);
 bool teal_row_input_valid_ITR64(char *value);
@@ -93,7 +72,8 @@ bool teal_row_input_valid_CURR(char *value);
 bool teal_row_input_valid_CH(char *value);
 bool teal_row_input_valid_ID(char *value);
 bool teal_row_input_valid_REF(char *value);
-
+*/
+/*
 int teal_write_row_field_STR(char *value);
 int teal_write_row_field_ITR32(char *value);
 int teal_write_row_field_ITR64(char *value);
@@ -103,11 +83,13 @@ int teal_write_row_field_DATE(char *value);
 int teal_write_row_field_CURR(char *value);
 int teal_write_row_field_CH(char *value);
 int teal_write_row_field_ID(char *value);
-int teal_write_row_field_REF(char *value); //defined below
+int teal_write_row_field_REF(char *value);
+*/ 
+//defined below
 
 bool
 teal_row_input_valid_STR(char* value) {
-	if (teal_str_len(value) >= FELT_STR_TYPE_MAX_LEN) {
+	if (teal_str_len(value) >= TEAL_STR_TYPE_MAX_LEN) {
 		return false;
 	}
 	return true;
@@ -178,13 +160,11 @@ teal_row_input_valid_BLN(char *value) {
 bool
 teal_row_input_valid_DATE(char *value) {
 	errno = 0;
-	char **split = teal_new_str_arr_split(value, "-");
-	size_t i = 0;
+	size_t count = 0;
+	char **split = teal_new_str_arr_split(value, "-", &count);
+
 	bool ret = false;
-	while (split[i] != NULL) {
-		i++;
-	}
-	if (i < 3) {
+	if (count < 3) {
 		goto cleanup;
 	}
 
@@ -213,13 +193,11 @@ cleanup:
 bool
 teal_row_input_valid_CURR(char *value) {
 	errno = 0;
-	char **split = teal_new_str_arr_split(value, ".");
-	size_t i = 0;
 	bool ret = false;
-	while (split[i] != NULL) {
-		i++;
-	}
-	if (i != 2) {
+	size_t count = 0;
+	char **split = teal_new_str_arr_split(value, ".", &count);
+
+	if (count != 2) {
 		goto cleanup;
 	}
 
@@ -262,65 +240,50 @@ teal_row_input_valid_CH(char* value) {
 	return true;
 }
 
-bool (*teal_row_input_valid_fns[8]) (char *value);
-
-int (*teal_write_row_field_fns[8]) (char *value);
+bool (*teal_field_input_valid_ptrs[8]) (char *value);
 
 int
 teal_set_row_input_valid_fns(void) {
-	teal_row_input_valid_fns[0] = teal_row_input_valid_STR;
-	teal_row_input_valid_fns[1] = teal_row_input_valid_ITR32;
-	teal_row_input_valid_fns[2] = teal_row_input_valid_ITR64;
-	teal_row_input_valid_fns[3] = teal_row_input_valid_DBL;
-	teal_row_input_valid_fns[4] = teal_row_input_valid_BLN;
-	teal_row_input_valid_fns[5] = teal_row_input_valid_DATE;
-	teal_row_input_valid_fns[6] = teal_row_input_valid_CURR;
-	teal_row_input_valid_fns[7] = teal_row_input_valid_CH;
+	teal_field_input_valid_ptrs[0] = teal_row_input_valid_STR;
+	teal_field_input_valid_ptrs[1] = teal_row_input_valid_ITR32;
+	teal_field_input_valid_ptrs[2] = teal_row_input_valid_ITR64;
+	teal_field_input_valid_ptrs[3] = teal_row_input_valid_DBL;
+	teal_field_input_valid_ptrs[4] = teal_row_input_valid_BLN;
+	teal_field_input_valid_ptrs[5] = teal_row_input_valid_DATE;
+	teal_field_input_valid_ptrs[6] = teal_row_input_valid_CURR;
+	teal_field_input_valid_ptrs[7] = teal_row_input_valid_CH;
 	/*
-	teal_row_input_valid_fns[8] = teal_row_input_valid_ID;
-	teal_row_input_valid_fns[9] = teal_row_input_valid_REF;
+	teal_field_input_valid_ptrs[8] = teal_row_input_valid_REF;
 	*/
-	teal_row_input_valid_fns_set = true;
+	teal_field_input_valid_ptrs_set = true;
 	return 0;
 }
 
 int
-teal_set_write_row_field_fns(void);
-
-int
-teal_insert_row_from_chars(teal_tabR table, char *row) {
-
-	int ret = 0;
-	char **split_row = teal_new_str_arr_split(row, ",");
-	size_t value_count = 0;
+teal_set_write_row_field_fns(void) {
 	
-	while (split_row[value_count]) {
-		value_count++;
-	}
-	if (value_count != table->n_cols) {
-		ret = 1;
-		goto cleanup;
-	}
-
-	for (size_t i = 0; split_row[i] != NULL; i++) {
-		//printf("%zu: %s\n", i + 1, split_row[i]);
-		bool result = false;
-		if (!(result = (*teal_row_input_valid_fns[i])(split_row[i]))) {
-			ret = 2;
-			goto cleanup;
-		}
-	}
-	/// will update to insert into data structure pending
-
-cleanup:
-	teal_free_split_str(split_row);
-	return ret;
+	return 0;
 }
+
+int teal_write_row_field_STR(char *value) {
+	return 0;
+}
+
+int teal_write_row_field_ITR32(char *value);
+int teal_write_row_field_ITR64(char *value);
+int teal_write_row_field_DBL(char *value);
+int teal_write_row_field_BLN(char *value);
+int teal_write_row_field_DATE(char *value);
+int teal_write_row_field_CURR(char *value);
+int teal_write_row_field_CH(char *value);
+int teal_write_row_field_ID(char *value);
+int teal_write_row_field_REF(char *value);
+
 
 teal_tabR
 teal_new_table(char* label, size_t primary_index, char* schema) {
 
-	if (!teal_row_input_valid_fns_set) {
+	if (!teal_field_input_valid_ptrs_set) {
 		teal_set_row_input_valid_fns();
 	}
 
@@ -332,22 +295,21 @@ teal_new_table(char* label, size_t primary_index, char* schema) {
 	table->uuid = teal_calloc(UUID_STR_LEN + 1, sizeof(char));
 	uuid_unparse_upper(bin_uuid, table->uuid);
 
-	char **schema_inputs = teal_new_str_arr_split(schema, " ");
-
-	for (size_t i = 0; schema_inputs[i] != NULL; i++) {
-		table->n_cols++;
-	}
-	table->col_labels = teal_calloc(table->n_cols, sizeof(char *));
+	char **schema_inputs = teal_new_str_arr_split(schema, " ", &(table->n_cols));
 	
+	table->col_labels = teal_calloc(table->n_cols, sizeof(char *));
 	table->schema = teal_calloc(table->n_cols, sizeof(TABLE_FIELD_TYPE));
-	for (size_t i = 0; schema_inputs[i] != NULL; i++) {
-		char *addr = NULL;
-		if (!(addr = teal_find_str_in_str_arr(TABLE_FIELD_TYPE_NAMES, schema_inputs[i]))) {
+
+	for (size_t i = 0; i < table->n_cols; i++) {
+
+		size_t index = teal_find_str_in_str_arr( TABLE_FIELD_TYPE_NAMES,
+												schema_inputs[i]);
+
+		if (index == ARR_INDEX_OOB) {
 			goto cancel;
 		}
-		size_t ind = (size_t)(addr - TABLE_FIELD_TYPE_NAMES[0]);
-		table->schema[i] = ind;
-		table->n_bytes_row += TABLE_FIELD_TYPE_SIZES[ind];
+		table->schema[i] = index;
+		table->n_bytes_row += TABLE_FIELD_TYPE_SIZES[index];
 	}
 	teal_free_split_str(schema_inputs);
 
@@ -367,4 +329,31 @@ cancel:
 	free(table->col_labels);
 	free(table);
 	return NULL;
+}
+
+int
+teal_insert_row_from_chars(teal_tabR table, char *row) {
+
+	int ret = 0;
+	size_t count = 0;
+	char **split_row = teal_new_str_arr_split(row, ",", &count);
+
+	if (count != table->n_cols) {
+		ret = 1;
+		goto cleanup;
+	}
+
+	for (size_t i = 0; i < count; i++) {
+		bool result = false;
+		if (!(result = (*teal_field_input_valid_ptrs[i])(split_row[i]))) {
+			ret = 2;
+			goto cleanup;
+		}
+	}
+	/// will update to insert into data structure pending
+
+	//printf("row bytes: %zu\n", table->n_bytes_row);
+cleanup:
+	teal_free_split_str(split_row);
+	return ret;
 }

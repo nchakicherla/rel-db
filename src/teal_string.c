@@ -30,14 +30,17 @@ teal_str_chr(char *str, char chr, size_t len) {
 	return NULL;
 }
 
-char *
+size_t
 teal_find_str_in_str_arr(char **arr, char *str) {
+	//printf("in find str, %s\n", str);
 	for (size_t i = 0; arr[i] != NULL; i++) {
 		if (teal_str_same(arr[i], str)) {
-			return arr[i];
+			//printf("%s\n", arr[i]);
+			//printf("i: %zu\n", i);
+			return i;
 		}
 	}
-	return NULL;
+	return ARR_INDEX_OOB;
 }
 
 bool
@@ -76,20 +79,20 @@ teal_new_str_stdin(void) {
 }
 
 char **
-teal_new_str_arr_split(char *str, char *delim) {
-	size_t num_toks = 1;
+teal_new_str_arr_split(char *str, char *delim, size_t *count) {
+	*count = 1;
 	for (size_t i = 0; i < teal_str_len(str); i++) {
 		if (teal_is_substr_at_addr(&str[i], delim)) {
-			num_toks++;
+			(*count)++;
 			i += teal_str_len(delim) - 1;
 		}
 	}
-	char **output = teal_calloc(num_toks + 1, sizeof(char *));
-	output[num_toks] = NULL;
+	char **output = teal_calloc((*count) + 1, sizeof(char *));
+	output[*count] = NULL;
 
 	char* start = str;
 	char* end = str;
-	for (size_t i = 0; i < num_toks; i++) {
+	for (size_t i = 0; i < *count; i++) {
 		while (!teal_is_substr_at_addr(end, delim) && *end != '\0') {
 			end++;
 		}
