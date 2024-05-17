@@ -29,19 +29,17 @@ int main(void) {
 										"STR ITR32 ITR64 DBL BLN DATE CURR CH");
 	
 	if (table) {
-		teal_update_table_column_labels(table, TABLE_TEST_COLUMN_LABELS);
-		printf("here\n");
+		teal_table_update_labels(table, TABLE_TEST_COLUMN_LABELS);
 
-		int ret = teal_insert_row_from_chars(table, 
-							"test,32,64,7.2,true,3-3-2023,52.43,k");
+		int ret = teal_table_insert_row(	table, 
+											"test,32,64,7.2,true,3-3-2023,52.43,k");
 
-		printf("num rows: %zu\n", table->n_rows);
 		if (ret) {
 			printf("failed!\n");
 		} else { 
 			printf("passed!\n");
 		}
-		teal_free_table(&table);
+		teal_table_free(&table);
 	}
 
 	return 0;

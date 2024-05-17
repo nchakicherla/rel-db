@@ -2,6 +2,7 @@
 
 size_t
 teal_str_len(char* str) {
+
 	size_t len = 0;
 	for (size_t i = 0; str[i] != '\0'; i++) {
 		len++;
@@ -11,17 +12,21 @@ teal_str_len(char* str) {
 
 char *
 teal_str_dup(char* str) {
+
 	size_t len = teal_str_len(str);
 	char *new_str = teal_calloc(len + 1, sizeof(char));
+
 	for (size_t i = 0; i < len; i++) {
 		new_str[i] = str[i];
 	}
 	new_str[len] = '\0';
+
 	return new_str;
 }
 
 char *
 teal_str_chr(char *str, char chr, size_t len) {
+
 	for (size_t i = 0; i < len; i++) {
 		if (str[i] == chr) {
 			return &str[i];
@@ -31,12 +36,11 @@ teal_str_chr(char *str, char chr, size_t len) {
 }
 
 size_t
-teal_find_str_in_str_arr(char **arr, char *str) {
-	//printf("in find str, %s\n", str);
+teal_scan_arr_for_str(char **arr, char *str) {
+
 	for (size_t i = 0; arr[i] != NULL; i++) {
 		if (teal_str_same(arr[i], str)) {
-			//printf("%s\n", arr[i]);
-			//printf("i: %zu\n", i);
+
 			return i;
 		}
 	}
@@ -45,6 +49,7 @@ teal_find_str_in_str_arr(char **arr, char *str) {
 
 bool
 teal_is_substr_at_addr(char* addr, char* substr) {
+	
 	for (size_t i = 0; i < teal_str_len(substr); i++) {
 		if (substr[i] != addr[i]) {
 			return false;
@@ -55,6 +60,7 @@ teal_is_substr_at_addr(char* addr, char* substr) {
 
 bool
 teal_str_same(char *str, char *cmp) {
+
 	if (!str || !cmp)
 		return false;
 	if (str[0] != cmp[0])
@@ -67,21 +73,25 @@ teal_str_same(char *str, char *cmp) {
 }
 
 char *
-teal_new_str_stdin(void) {
+teal_new_str_from_stdin(void) {
+
 	const size_t buff_len = 256;
 	char *input = teal_calloc(buff_len, sizeof(char));
 	char *end = NULL;
+
 	while (!(end = teal_str_chr(input, '\n', buff_len))) {
 		input = fgets(input, buff_len, stdin);
 	}
 	*end = '\0';
+
 	return input;
 }
 
 char **
-teal_new_str_arr_split(char *str, char *delim, size_t *count) {
+teal_new_arr_from_str(char *str, char *delim, size_t *count) {
+
 	*count = 1;
-	for (size_t i = 0; i < teal_str_len(str); i++) {
+	for (size_t i = 0; i < teal_str_len(str) && *count < ARR_INDEX_OOB; i++) {
 		if (teal_is_substr_at_addr(&str[i], delim)) {
 			(*count)++;
 			i += teal_str_len(delim) - 1;
@@ -111,10 +121,12 @@ teal_new_str_arr_split(char *str, char *delim, size_t *count) {
 }
 
 void
-teal_free_split_str(char **split_str) {
+teal_free_str_arr(char **split_str) {
+
 	for (size_t i = 0; split_str[i] != NULL; i++) {
 		free(split_str[i]);
 	}
 	free(split_str);
+
 	return;
 }

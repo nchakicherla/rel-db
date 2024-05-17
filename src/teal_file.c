@@ -2,6 +2,7 @@
 
 char *
 teal_new_str_from_file(char *name) {
+	
 	FILE* file = NULL;
 	char *output = NULL;
 	long size;

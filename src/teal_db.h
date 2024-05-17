@@ -46,7 +46,7 @@ typedef struct Teal_Table {
 	TABLE_FIELD_TYPE *schema;
 	size_t *field_offsets;
 	char **col_labels;
-	bool primary_specified;
+	bool has_primary;
 	size_t primary;
 	size_t n_bytes_schema;
 	size_t n_bytes_row;
@@ -62,30 +62,30 @@ typedef struct Teal_Reference_Field {
 	char *tab_uuid;
 	size_t row;
 	size_t col;
-} teal_ref_field;
+} teal_field_reference;
 
 teal_tabR
 teal_new_table(char* label, size_t primary_index, char* schema);
 
 void
-teal_free_table(teal_tabR *teal_tabRR);
+teal_table_free(teal_tabR *teal_tabRR);
 
 void
-teal_free_table_data(teal_tabR table);
+teal_table_free_data(teal_tabR table);
 
 int
-teal_update_table_column_labels(teal_tabR table, char **labels);
+teal_table_update_labels(teal_tabR table, char **labels);
 
 int
-teal_insert_row_from_chars(teal_tabR table, char *row);
+teal_table_insert_row(teal_tabR table, char *row);
 
 int
-teal_set_row_input_valid_fns(void);
+teal_table_grow_bytes(teal_tabR table);
+
+int
+teal_set_validation_fns(void);
 
 int
 teal_set_write_row_field_fns(void);
-
-int
-teal_grow_table_bytes(teal_tabR table);
 
 #endif // TEAL_DB_H
