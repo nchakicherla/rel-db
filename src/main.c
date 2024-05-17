@@ -24,22 +24,21 @@ char *TABLE_TEST_COLUMN_LABELS[] =
 				NULL};
 
 int main(void) {
-	/*
-	char *test = teal_new_str_from_file("test.txt");
-	free(test);
-	*/
 
-	teal_tabR table = teal_new_table(	"My Table", 0, 
+	teal_tabR table = teal_new_table(	"My Table", NO_PRIMARY_KEY, 
 										"STR ITR32 ITR64 DBL BLN DATE CURR CH");
 	
 	if (table) {
 		teal_update_table_column_labels(table, TABLE_TEST_COLUMN_LABELS);
+		printf("here\n");
 
 		int ret = teal_insert_row_from_chars(table, 
 							"test,32,64,7.2,true,3-3-2023,52.43,k");
+
+		printf("num rows: %zu\n", table->n_rows);
 		if (ret) {
 			printf("failed!\n");
-		} else {
+		} else { 
 			printf("passed!\n");
 		}
 		teal_free_table(&table);
