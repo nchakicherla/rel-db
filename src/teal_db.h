@@ -80,12 +80,15 @@ int
 teal_table_insert_row(teal_tabR table, char *row);
 
 int
-teal_table_grow_bytes(teal_tabR table);
+teal_table_grow_bytes_2x(teal_tabR table);
 
 int
 teal_set_validation_fns(void);
 
 int
 teal_set_write_row_field_fns(void);
+
+void
+teal_debug_print_table_info(teal_tabR table);
 
 #endif // TEAL_DB_H

@@ -34,7 +34,18 @@ int main(void) {
 		int ret = teal_table_insert_row(	table, 
 											"test,32,64,7.2,true,3-3-2023,52.43,k");
 
-		if (ret) {
+		//teal_debug_print_table_info(table);
+		int ret2 = teal_table_insert_row(	table, 
+											"test,32,64,7.2,true,3-3-2023,52.43,k");
+		//teal_debug_print_table_info(table);
+
+		int ret3 = teal_table_insert_row(	table, 
+											"test,32,64,7.2,true,3-3-2023,52.43,k");
+
+		//teal_debug_print_table_info(table);
+
+
+		if (ret || ret2 || ret3) {
 			printf("failed!\n");
 		} else { 
 			printf("passed!\n");

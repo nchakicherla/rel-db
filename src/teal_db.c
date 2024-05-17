@@ -244,21 +244,21 @@ teal_validate_input_CH(char* value) {
 	return true;
 }
 
-bool (*teal_input_valid_ptrs[NUM_IMPLEMENTED_TYPES]) (char *value);
+bool (*teal_is_input_valid[NUM_IMPLEMENTED_TYPES]) (char *value);
 
 int
 teal_set_validation_fns(void) {
 
-	teal_input_valid_ptrs[STR] = teal_validate_input_STR;
-	teal_input_valid_ptrs[ITR32] = teal_validate_input_ITR32;
-	teal_input_valid_ptrs[ITR64] = teal_validate_input_ITR64;
-	teal_input_valid_ptrs[DBL] = teal_validate_input_DBL;
-	teal_input_valid_ptrs[BLN] = teal_validate_input_BLN;
-	teal_input_valid_ptrs[DATE] = teal_validate_input_DATE;
-	teal_input_valid_ptrs[CURR] = teal_validate_input_CURR;
-	teal_input_valid_ptrs[CH] = teal_validate_input_CH;
+	teal_is_input_valid[STR] = teal_validate_input_STR;
+	teal_is_input_valid[ITR32] = teal_validate_input_ITR32;
+	teal_is_input_valid[ITR64] = teal_validate_input_ITR64;
+	teal_is_input_valid[DBL] = teal_validate_input_DBL;
+	teal_is_input_valid[BLN] = teal_validate_input_BLN;
+	teal_is_input_valid[DATE] = teal_validate_input_DATE;
+	teal_is_input_valid[CURR] = teal_validate_input_CURR;
+	teal_is_input_valid[CH] = teal_validate_input_CH;
 	/*
-	teal_input_valid_ptrs[8] = teal_row_input_valid_REF;
+	teal_is_input_valid[8] = teal_row_input_valid_REF;
 	*/
 	teal_input_validate_fns_set = true;
 	return 0;
@@ -426,7 +426,6 @@ teal_new_table(char* label, size_t primary_index, char* schema) {
 	teal_free_str_arr(schema_inputs);
 
 	table->n_bytes_schema = table->n_bytes_row;
-
 	table->n_bytes_row += TEAL_FIELD_TYPE_SIZES[ROW_ID]; // add space for ROW_ID
 
 	if (primary_index == 0) {
@@ -462,8 +461,7 @@ teal_table_insert_row(teal_tabR table, char *row) {
 	for (size_t i = 0; i < value_count; i++) {
 		bool result = false;
 		if (!(result = 
-				(*teal_input_valid_ptrs[table->schema[i]])(split_row[i]))) {
-
+				(*teal_is_input_valid[table->schema[i]])(split_row[i]))) {
 			ret = 2;
 			goto cleanup;
 		}
@@ -474,7 +472,7 @@ teal_table_insert_row(teal_tabR table, char *row) {
 
 	}
 	while (table->bytes_avail < table->n_bytes_row) {
-		teal_table_grow_bytes(table);
+		teal_table_grow_bytes_2x(table);
 	}
 
 	char *writer_addr = (char *) table->bytes;
@@ -492,15 +490,31 @@ teal_table_insert_row(teal_tabR table, char *row) {
 		writer_addr += TEAL_FIELD_TYPE_SIZES[table->schema[i]];
 	}
 
+	table->bytes_used += table->n_bytes_row;
+
 cleanup:
 	teal_free_str_arr(split_row);
 	return ret;
 }
 
 int
-teal_table_grow_bytes(teal_tabR table) {
+teal_table_grow_bytes_2x(teal_tabR table) {
 
 	teal_grow_alloc(table->bytes, 2 * table->bytes_avail);
 	table->bytes_avail *= 2;
 	return 0;
+}
+
+
+void
+teal_debug_print_table_info(teal_tabR table) {
+
+	printf("label: %s\n", table->label);
+	printf("uuid: %s\n", table->uuid);
+	printf("n_bytes_schema: %zu\n", table->n_bytes_schema);
+	printf("n_bytes_row: %zu\n", table->n_bytes_row);
+	printf("ncols: %zu, nrows: %zu\n", table->n_cols, table->n_rows);
+	printf("bytes_avail: %zu\n", table->bytes_avail);
+	printf("bytes_used: %zu\n", table->bytes_used);
+	return;
 }
