@@ -71,7 +71,7 @@ void
 teal_table_free(teal_tabR *teal_tabRR);
 
 void
-teal_table_free_data(teal_tabR table);
+teal_table_free_bytes(teal_tabR table);
 
 int
 teal_table_update_labels(teal_tabR table, char **labels);

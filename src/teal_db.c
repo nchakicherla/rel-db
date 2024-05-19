@@ -38,7 +38,7 @@ const size_t TEAL_FIELD_TYPE_SIZES[] =
 void
 teal_table_free(teal_tabR *teal_tabRR) {
 	
-	teal_table_free_data(*teal_tabRR); // frees any allocations
+	teal_table_free_bytes(*teal_tabRR); // frees any allocations
 	free((*teal_tabRR)->label);
 	free((*teal_tabRR)->uuid);
 	free((*teal_tabRR)->schema);
@@ -54,20 +54,25 @@ teal_table_free(teal_tabR *teal_tabRR) {
 }
 
 void
-teal_table_free_data(teal_tabR table) {
+teal_table_free_bytes(teal_tabR table) {
 
 	size_t total_offset;
 	for (size_t i = 0; i < table->n_rows; i++) {
 		for (size_t j = 0; j < table->n_cols; j++) {
 			if (table->schema[j] == STR) {
+										// start at & current row
 				total_offset = 	(i * table->n_bytes_row) 
-								+ TEAL_FIELD_TYPE_SIZES[ROW_ID] 
+										// account for size_t attached to each row
+								+ TEAL_FIELD_TYPE_SIZES[ROW_ID]
+										// account for any prior fields
 								+ table->field_offsets[j];
-
-				const void *ptr = (void *)((char *)(table->bytes) + total_offset);
+				/*
+				const void *ptr = ((char *)(table->bytes) + total_offset);
 				char *str_ptr = NULL;
-				memcpy(&str_ptr, ptr, sizeof(char *));
-				free(str_ptr);
+				memcpy(&str_ptr, ptr, TEAL_FIELD_TYPE_SIZES[STR]);
+				//free(str_ptr);
+				*/
+				free(*(char**)((char *)(table->bytes) + total_offset));
 			}
 		}
 	}
@@ -479,7 +484,7 @@ teal_table_insert_row(teal_tabR table, char *row) {
 	writer_addr += table->bytes_used;
 
 	size_t *size_t_cast = (size_t *) writer_addr;
-	*size_t_cast = table->n_rows + 1;
+	*size_t_cast = table->n_rows + 1; // write ROW_ID
 	
 	table->n_rows++;
 

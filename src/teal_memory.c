@@ -2,7 +2,7 @@
 
 void *
 teal_calloc(size_t n, size_t size) {
-	
+
 	void *ptr_out = NULL;
 	if(!(ptr_out = calloc(n, size))) {
 		exit(EXIT_FAILURE);

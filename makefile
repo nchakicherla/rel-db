@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -std=c99 -Wall -Wpedantic -Werror -luuid
+CFLAGS = -std=c99 -Wall -Wpedantic -luuid -Werror
 OS := $(shell uname)
 
 mkBinDir := $(shell mkdir -p bin)
