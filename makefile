@@ -7,12 +7,13 @@ mkObjDir := $(shell mkdir -p obj)
 
 MAIN = 	./obj/main.o
 
-OBJS = 	./obj/teal_memory.o		\
-		./obj/teal_error.o 		\
-		./obj/teal_string.o 		\
-		./obj/teal_interpreter.o 	\
-		./obj/teal_file.o 		\
-		./obj/teal_db.o 			\
+OBJS = 	./obj/teal_memory.o \
+		./obj/teal_error.o \
+		./obj/teal_string.o \
+		./obj/teal_interpreter.o \
+		./obj/teal_file.o \
+		./obj/teal_db.o \
+		./obj/teal_csv.o \
 
 run: final-link
 ifeq ($(OS),Darwin) 

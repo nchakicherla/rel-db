@@ -1,23 +1,24 @@
 #include "teal_db.h"
 
-#define META_NUM_TYPES_IMPLEMENTED 8
+#define NUM_TYPES_IMPL 8
 
 
-#define DATA_BUFFER_DEFAULT_SIZE 512
-#define DATA_BUFFER_GROWTH_FACTOR 2.0f
+#define DEF_BYTES_LEN 512
+#define BYTES_GROW_FACTOR 2.0f
 
-#define TEAL_STR_TYPE_MAX_LEN 8192
+#define MAX_STR_LEN 8192
 
-#define MARA_FLT_TYPE_MAX_VAL 1e20
-#define MARA_FLT_TYPE_MAX_FRAC_DIGS 30
-#define MARA_FLT_TYPE_MAX_SIGFIGS 15
+#define MAX_FLT_VAL 1e20
+#define MAX_FLT_FRAC_DIGS 30
+#define MAX_FLT_SIG_FIGS 15
 
-bool teal_validate_input_fnptrs_set = false;
-bool teal_write_field_fnptrs_set = false;
-bool teal_print_field_value_fnptrs_set = false;
+bool input_valid_ptrs_set = false;
+bool write_field_ptrs_set = false;
+bool print_field_ptrs_set = false;
 
-char *TEAL_FIELD_TYPE_NAMES[] = 
+char *TYPE_NAME_LITERALS[] = 
 {
+	"__ROW_ID",
 	"STR",
 	"ITR32",
 	"ITR64",
@@ -26,13 +27,13 @@ char *TEAL_FIELD_TYPE_NAMES[] =
 	"DATE",
 	"CURR",
 	"CH",
-	"ROW_ID",
 	"REF",
 	NULL
 };
 
-const size_t TEAL_FIELD_TYPE_SIZES[] = 
+const size_t TYPE_SIZES_BYTES[] = 
 {
+	sizeof(size_t),
 	sizeof(char *),
 	sizeof(int32_t),
 	sizeof(int64_t),
@@ -41,7 +42,6 @@ const size_t TEAL_FIELD_TYPE_SIZES[] =
 	sizeof(uint16_t) + sizeof(uint8_t) + sizeof(uint8_t),
 	sizeof(int64_t) + sizeof(uint8_t),
 	sizeof(char),
-	sizeof(size_t),
 	// pending implement
 	sizeof(teal_field_reference)
 };
@@ -54,41 +54,42 @@ typedef struct Mara_Parsed_Float { // taken from my mara library
 mara_fltR 
 __mara_new_parsed_float (char *str) {
 
-	size_t len = teal_str_len(str);
+	size_t len = teal_str_len (str);
 
 	for (size_t i = 0; i < len; i++) {
-		if (!isdigit(str[i]) && str[i] != '.' && str[i] != 'e' && str[i] != '-') {
+		if (!isdigit (str[i]) && str[i] != '.' && str[i] != 'e' && str[i] != '-') {
 			return NULL;
 		}
 	}
 
 	char *end_ptr = str;
-	double val = strtod(str, &end_ptr);
+	double val = strtod (str, &end_ptr);
 	int frac_digs = 0;
 
 	if (end_ptr == str) {
 		return NULL;
 	}
 
-	char *e_loc = teal_str_chr(str, 'e', len);
-	char *dec_loc = teal_str_chr(str, '.', len);
+	char *e_loc = teal_str_chr (str, 'e', len);
+	char *dec_loc = teal_str_chr (str, '.', len);
 
     if (dec_loc) {
         if(*(dec_loc + 1) != '\0') { // check for second decimal
-            if(teal_str_chr(dec_loc + 1, '.', len - (size_t)(dec_loc - str + 1))) {
+            if( teal_str_chr (dec_loc + 1, '.', len - (size_t)(dec_loc - str + 1))) {
                 return NULL;
             }
         }
     }
     if(e_loc) {
         if(*(e_loc + 1) != '\0') {
-            if(teal_str_chr(e_loc + 1, 'e', len - (size_t)(e_loc - str + 1))) {
+            if( teal_str_chr (e_loc + 1, 'e', len - (size_t)(e_loc - str + 1))) {
                 return NULL;
             }            
         }
     }
 
-    if(e_loc && *(e_loc + 1) == '-') {           
+    if(e_loc && *(e_loc + 1) == '-') {
+
         char* it = e_loc;
         if(dec_loc) {
             while(*(it - 1) != '.') {
@@ -96,22 +97,23 @@ __mara_new_parsed_float (char *str) {
                 frac_digs++;
             }
         }
-        frac_digs += (int)strtol(e_loc + 2, NULL, 10);
+        frac_digs += (int) strtol (e_loc + 2, NULL, 10);
+
     } else if (!e_loc && dec_loc) {
         frac_digs += (len - (int)(dec_loc - str + 1));
     }
 
-    if(frac_digs > MARA_FLT_TYPE_MAX_FRAC_DIGS) {
+    if(frac_digs > MAX_FLT_FRAC_DIGS) {
         return NULL;
     }
-    if(e_loc != NULL && (size_t)(e_loc - str) - 1 > MARA_FLT_TYPE_MAX_SIGFIGS) {
+    if(e_loc != NULL && (size_t)(e_loc - str) - 1 > MAX_FLT_SIG_FIGS) {
         return NULL;
     }
-    if(val > MARA_FLT_TYPE_MAX_VAL) {
+    if(val > MAX_FLT_VAL) {
         return NULL;
     }
 
-    mara_fltR parsed_flt = __teal_calloc(1, sizeof(struct Mara_Parsed_Float));
+    mara_fltR parsed_flt = __teal_calloc (1, sizeof(struct Mara_Parsed_Float));
 
     parsed_flt->val = val;
     parsed_flt->frac_digs = frac_digs;
@@ -188,7 +190,7 @@ teal_print_field_value_CH (void *addr) {
 	return;
 }
 
-void ( *teal_print_field_value_fnptrs[ META_NUM_TYPES_IMPLEMENTED ]) (void *addr);
+void ( *teal_print_field_value_fnptrs[ NUM_TYPES_IMPL ]) (void *addr);
 
 int 
 teal_set_print_field_value_fnptrs (void) {
@@ -202,7 +204,7 @@ teal_set_print_field_value_fnptrs (void) {
 	teal_print_field_value_fnptrs[CURR] = teal_print_field_value_CURR;
 	teal_print_field_value_fnptrs[CH] = teal_print_field_value_CH;
 
-	teal_print_field_value_fnptrs_set = true;
+	print_field_ptrs_set = true;
 	return 0;
 }
 
@@ -218,7 +220,7 @@ teal_print_row (teal_tabR table, void *addr) {
 
 	char *ptr = addr;
 	printf ("%zu\t",  *(size_t *) ptr);
-	ptr += TEAL_FIELD_TYPE_SIZES[ ROW_ID ];
+	ptr += TYPE_SIZES_BYTES[ __ROW_ID ];
 
 	for ( size_t i = 0; i < table->n_cols; i++ ) {
 
@@ -242,7 +244,7 @@ teal_table_free (teal_tabR *teal_tabRR) {
 
 			if ((*teal_tabRR)->schema[j] == STR) {
 				// total_offset = prior row offset + row_id size + prior fields in row offset
-				total_offset = 	(i * (*teal_tabRR)->n_bytes_row) + TEAL_FIELD_TYPE_SIZES[ROW_ID] + (*teal_tabRR)->field_offsets[j];
+				total_offset = 	(i * (*teal_tabRR)->n_bytes_row) + TYPE_SIZES_BYTES[__ROW_ID] + (*teal_tabRR)->field_offsets[j];
 				__teal_free ( *(char**)( (char *)((*teal_tabRR)->bytes) + total_offset));
 			}
 		}
@@ -276,7 +278,7 @@ teal_table_update_labels (teal_tabR table, char **labels) {
 bool 
 teal_validate_input_STR (char* value) {
 
-	if (teal_str_len (value) >= TEAL_STR_TYPE_MAX_LEN) {
+	if (teal_str_len (value) >= MAX_STR_LEN) {
 		return false;
 	}
 	return true;
@@ -445,7 +447,7 @@ teal_validate_input_CH (char* value) {
 	return true;
 }
 
-bool ( *teal_validate_input_fnptrs[ META_NUM_TYPES_IMPLEMENTED ]) (char *value);
+bool ( *teal_validate_input_fnptrs[ NUM_TYPES_IMPL ]) (char *value);
 
 int
 teal_set_validate_input_fnptrs (void) {
@@ -461,7 +463,7 @@ teal_set_validate_input_fnptrs (void) {
 	/*
 	teal_validate_input_fnptrs[8] = teal_row_input_valid_REF;
 	*/
-	teal_validate_input_fnptrs_set = true;
+	input_valid_ptrs_set = true;
 	return 0;
 }
 
@@ -586,7 +588,7 @@ teal_write_field_input_CH (char *value, void *start_addr) {
 /*
 int teal_write_field_input_REF(char *value, void *start_addr);
 */
-int ( *teal_write_field_fnptrs[ META_NUM_TYPES_IMPLEMENTED ]) (char *value, void *start_addr);
+int ( *teal_write_field_fnptrs[ NUM_TYPES_IMPL ]) (char *value, void *start_addr);
 
 int
 teal_set_write_field_fnptrs (void) {
@@ -599,20 +601,20 @@ teal_set_write_field_fnptrs (void) {
 	teal_write_field_fnptrs[CURR] = teal_write_field_input_CURR;
 	teal_write_field_fnptrs[CH] = teal_write_field_input_CH;
 
-	teal_write_field_fnptrs_set = true;
+	write_field_ptrs_set = true;
 	return 0;
 }
 
 teal_tabR
 teal_new_table (char* label, size_t primary_index, char* schema) {
 
-	if (false == teal_validate_input_fnptrs_set) {
+	if (false == input_valid_ptrs_set) {
 		teal_set_validate_input_fnptrs ();
 	}
-	if (false == teal_write_field_fnptrs_set) {
+	if (false == write_field_ptrs_set) {
 		teal_set_write_field_fnptrs ();
 	}
-	if (false == teal_print_field_value_fnptrs_set) {
+	if (false == print_field_ptrs_set) {
 		teal_set_print_field_value_fnptrs ();
 	}
 
@@ -632,7 +634,7 @@ teal_new_table (char* label, size_t primary_index, char* schema) {
 
 	for (size_t i = 0; i < table->n_cols; i++) {
 
-		size_t type_index = teal_scan_arr_for_str ( TEAL_FIELD_TYPE_NAMES,
+		size_t type_index = teal_scan_arr_for_str ( TYPE_NAME_LITERALS,
 												schema_inputs[i]);
 
 		if ( type_index == ARR_INDEX_OOB ) {
@@ -640,12 +642,12 @@ teal_new_table (char* label, size_t primary_index, char* schema) {
 		}
 		table->field_offsets[i] = table->n_bytes_row;
 		table->schema[i] = type_index;
-		table->n_bytes_row += TEAL_FIELD_TYPE_SIZES[ type_index ];
+		table->n_bytes_row += TYPE_SIZES_BYTES[ type_index ];
 	}
 	teal_free_str_arr (schema_inputs);
 
 	table->n_bytes_schema = table->n_bytes_row;
-	table->n_bytes_row += TEAL_FIELD_TYPE_SIZES[ ROW_ID ]; // add space for ROW_ID
+	table->n_bytes_row += TYPE_SIZES_BYTES[ __ROW_ID ]; // add space for __ROW_ID
 
 	if (primary_index == 0) {
 		table->has_primary = false;
@@ -686,8 +688,8 @@ teal_table_insert_row (teal_tabR table, char *row) {
 		}
 	}
 	if (!table->bytes) {
-		table->bytes = __teal_calloc (DATA_BUFFER_DEFAULT_SIZE, sizeof(char));
-		table->bytes_avail = DATA_BUFFER_DEFAULT_SIZE;
+		table->bytes = __teal_calloc (DEF_BYTES_LEN, sizeof(char));
+		table->bytes_avail = DEF_BYTES_LEN;
 	}
 
 	while (table->bytes_avail - table->bytes_used < table->n_bytes_row) {
@@ -698,15 +700,15 @@ teal_table_insert_row (teal_tabR table, char *row) {
 	writer_addr += table->bytes_used;
 
 	size_t *size_t_cast = (size_t *) writer_addr;
-	*size_t_cast = table->n_rows + 1; // write ROW_ID; starts at idx 1 naturally
+	*size_t_cast = table->n_rows + 1; // write __ROW_ID; starts at idx 1 naturally
 	
 	table->n_rows++;
 
-	writer_addr += TEAL_FIELD_TYPE_SIZES[ ROW_ID ];
+	writer_addr += TYPE_SIZES_BYTES[ __ROW_ID ];
 
 	for (size_t i = 0; i < value_count; i++) {
 		( *teal_write_field_fnptrs[ table->schema[i] ] )( split_row[i], writer_addr );
-		writer_addr += TEAL_FIELD_TYPE_SIZES[ table->schema[i] ];
+		writer_addr += TYPE_SIZES_BYTES[ table->schema[i] ];
 	}
 
 	table->bytes_used += table->n_bytes_row;
@@ -720,7 +722,7 @@ int
 teal_table_grow_bytes (teal_tabR table) {
 
 	void *new_bytes = NULL;
-	size_t new_size = table->bytes_avail * DATA_BUFFER_GROWTH_FACTOR;
+	size_t new_size = table->bytes_avail * BYTES_GROW_FACTOR;
 
 	if( NULL == (new_bytes = __teal_realloc (table->bytes, new_size)) ) {
 		return 1;

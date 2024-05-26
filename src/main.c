@@ -10,10 +10,7 @@
 #include "teal_interpreter.h"
 #include "teal_file.h"
 #include "teal_db.h"
-
-// to do 
-// 1. implement arena in memory.c
-// 2. make teal_db use arena provided from main scope
+#include "teal_csv.h"
 
 
 char *TABLE_TEST_COLUMN_LABELS[] = 
@@ -51,15 +48,21 @@ int main (void) {
 		}
 		//printf("adding many rows...\n");
 		for (size_t i = 4; i <= 10; i++) {
-			//teal_debug_print_table_info(table);
-			int ret = teal_table_insert_row (table, "test,32,64,7.2,true,3-3-2023,52.43,k");
-			printf ("i: %zu, ret: %d\n", i, ret);
-			printf ("addr: %p\n", teal_get_row_addr (table, i) );
-
+			teal_table_insert_row (table, "test,32,64,7.2,fAlse,3-3-2023,52.43,k");
+		}
+		for (size_t i = 1; i <= 10; i++) {
 			teal_print_row (table, teal_get_row_addr (table, i) );
 		}
 		teal_table_free (&table);
 	}
+
+	teal_csvR csv = teal_new_csv ("./resources/housewares.csv");
+
+	for (size_t i = 0; i < csv->n_rows; i++) {
+		printf ("%zu\t%s\n", i + 1, csv->rows[i]);
+	}
+
+	teal_free_csv (&csv);
 
 	return 0;
 }

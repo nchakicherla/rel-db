@@ -20,15 +20,15 @@ typedef struct Teal_Message {
 } *teal_msgR;
 
 teal_maybeR
-teal_new_maybe(int32_t code, void* data);
+teal_new_maybe (int32_t code, void* data);
 
 teal_msgR
-teal_new_message(int32_t code, char* msg, char* fn);
+teal_new_message (int32_t code, char* msg, char* fn);
 
 void
-teal_free_maybe(teal_maybeR *teal_maybeRR);
+teal_free_maybe (teal_maybeR *teal_maybeRR);
 
 void
-teal_free_message(teal_msgR *teal_msgRR);
+teal_free_message (teal_msgR *teal_msgRR);
 
 #endif // TEAL_ERROR_H

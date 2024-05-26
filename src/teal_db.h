@@ -13,7 +13,7 @@
 #include <ctype.h>
 #include <stddef.h>
 //#include <stdarg.h>
-int teal_write_field_input_CURR(char *value, void *start_addr);
+int teal_write_field_input_CURR (char *value, void *start_addr);
 
 #include "teal_memory.h"
 #include "teal_string.h"
@@ -23,7 +23,8 @@ int teal_write_field_input_CURR(char *value, void *start_addr);
 #define ROW_ID_INVALID SIZE_MAX	
 
 typedef enum {
-	STR = 0,
+	__ROW_ID = 0,
+	STR,
 	ITR32,
 	ITR64,
 	FLT,
@@ -31,7 +32,6 @@ typedef enum {
 	DATE,
 	CURR,
 	CH,
-	ROW_ID,
 	REF,
 } TABLE_FIELD_TYPE;
 
@@ -67,36 +67,36 @@ typedef struct Teal_Reference_Field {
 } teal_field_reference;
 
 void *
-teal_get_row_addr(teal_tabR table, size_t ind);
+teal_get_row_addr (teal_tabR table, size_t ind);
 
 void
-teal_print_row(teal_tabR table, void *addr);
+teal_print_row (teal_tabR table, void *addr);
 
 teal_tabR
-teal_new_table(char* label, size_t primary_index, char* schema);
+teal_new_table (char* label, size_t primary_index, char* schema);
 
 void
-teal_table_free(teal_tabR *teal_tabRR);
+teal_table_free (teal_tabR *teal_tabRR);
 
 void
-teal_table_free_str_allocs(teal_tabR table);
+teal_table_free_str_allocs (teal_tabR table);
 
 int
-teal_table_update_labels(teal_tabR table, char **labels);
+teal_table_update_labels (teal_tabR table, char **labels);
 
 int
-teal_table_insert_row(teal_tabR table, char *row);
+teal_table_insert_row (teal_tabR table, char *row);
 
 int
-teal_table_grow_bytes(teal_tabR table);
+teal_table_grow_bytes (teal_tabR table);
 
 int
-teal_set_validate_input_fnptrs(void);
+teal_set_validate_input_fnptrs (void);
 
 int
-teal_set_write_row_field_fns(void);
+teal_set_write_row_field_fns (void);
 
 void
-teal_debug_print_table_info(teal_tabR table);
+teal_debug_print_table_info (teal_tabR table);
 
 #endif // TEAL_DB_H

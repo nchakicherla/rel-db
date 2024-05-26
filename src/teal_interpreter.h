@@ -21,6 +21,6 @@ typedef struct teal_Token {
 } *teal_tokR;
 
 teal_tokR
-teal_new_tok(FELT_TOK_TYPE type, void *data);
+teal_new_tok (FELT_TOK_TYPE type, void *data);
 
 #endif // TEAL_INTERPRETER_H
