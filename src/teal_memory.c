@@ -15,17 +15,6 @@ teal_set_free_impl ( void (*fn)(void *ptr)) {
 	return;
 }
 
-/*
-void *
-__teal_calloc(size_t n, size_t size) {
-
-	void *ptr_out = NULL;
-	if(!(ptr_out = calloc(n, size))) {
-		exit(EXIT_FAILURE);
-	}
-	return ptr_out;
-}
-*/
 void *
 __teal_calloc (size_t n, size_t size) {
 	void *ptr_out = NULL;
@@ -39,18 +28,18 @@ __teal_free (void *ptr) {
 	if (!ptr) {
 		return;
 	}
-	//free(ptr);
+
 	free_impl_fn (ptr);
 	return;
 }
 
 void *
-__teal_realloc (void *ptr, size_t bytes) {
+__teal_realloc (void *ptr, size_t new_bytes, size_t old_bytes) {
 
-	void *ptr_out = NULL;
-	if(!(ptr_out = realloc (ptr, bytes))) {
-		exit (EXIT_FAILURE);
-	}
+	void *ptr_out = __teal_calloc (new_bytes, 1);
+	memcpy (ptr_out, ptr, old_bytes);
+	__teal_free (ptr);
+
 	return ptr_out;
 }
 
@@ -59,7 +48,7 @@ __teal_shrink_alloc (void *ptr, size_t bytes) {
 
 	void *ptr_out = __teal_calloc (bytes, 1);
 	memcpy (ptr_out, ptr, bytes);
-	free (ptr);
+	__teal_free (ptr);
 
 	return ptr_out;
 }

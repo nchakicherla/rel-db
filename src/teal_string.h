@@ -31,6 +31,9 @@ teal_str_same (char *str, char *cmp);
 char *
 teal_new_str_from_stdin (void);
 
+char *
+teal_new_str_repeat (char *str, size_t n, char *delim);
+
 char **
 teal_new_arr_from_str (char *str, char *delim, size_t *count);
 

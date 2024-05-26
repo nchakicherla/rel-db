@@ -18,7 +18,7 @@ bool print_field_ptrs_set = false;
 
 char *TYPE_NAME_LITERALS[] = 
 {
-	"__ROW_ID",
+	"_ROW_ID",
 	"STR",
 	"ITR32",
 	"ITR64",
@@ -167,9 +167,12 @@ void
 teal_print_field_value_DATE (void *addr) {
 
 	char* ptr = (char *) addr;
-	printf ("%" PRIu16 "/", *(uint16_t *) ptr);
+	// month
 	printf ("%" PRIu8 "/", *(uint8_t *)(ptr + sizeof(uint16_t)));
-	printf ("%" PRIu8 "", *(uint8_t *)(ptr + sizeof(uint16_t) + sizeof(uint8_t)));
+	// day
+	printf ("%" PRIu8 "/", *(uint8_t *)(ptr + sizeof(uint16_t) + sizeof(uint8_t)));
+	// year
+	printf ("%" PRIu16 "", *(uint16_t *) ptr);
 	return;
 }
 
@@ -211,7 +214,7 @@ teal_set_print_field_value_fnptrs (void) {
 void *
 teal_get_row_addr (teal_tabR table, size_t ind) {
 
-	void *addr = (char *) table->bytes + ((ind - 1) * table->n_bytes_row);
+	void *addr = (char *) table->bytes + ((ind) * table->n_bytes_row);
 	return addr;
 }
 
@@ -220,14 +223,14 @@ teal_print_row (teal_tabR table, void *addr) {
 
 	char *ptr = addr;
 	printf ("%zu\t",  *(size_t *) ptr);
-	ptr += TYPE_SIZES_BYTES[ __ROW_ID ];
+	ptr += TYPE_SIZES_BYTES[ _ROW_ID ];
 
 	for ( size_t i = 0; i < table->n_cols; i++ ) {
 
 		( *teal_print_field_value_fnptrs[ table->schema[i] ])( (char *) ptr + table->field_offsets[i] );
 
 		if (i < table->n_cols - 1) {
-			printf("\t");
+			printf(", ");
 		} else {
 			printf("\n");
 		}
@@ -244,7 +247,7 @@ teal_table_free (teal_tabR *teal_tabRR) {
 
 			if ((*teal_tabRR)->schema[j] == STR) {
 				// total_offset = prior row offset + row_id size + prior fields in row offset
-				total_offset = 	(i * (*teal_tabRR)->n_bytes_row) + TYPE_SIZES_BYTES[__ROW_ID] + (*teal_tabRR)->field_offsets[j];
+				total_offset = 	(i * (*teal_tabRR)->n_bytes_row) + TYPE_SIZES_BYTES[_ROW_ID] + (*teal_tabRR)->field_offsets[j];
 				__teal_free ( *(char**)( (char *)((*teal_tabRR)->bytes) + total_offset));
 			}
 		}
@@ -486,6 +489,7 @@ int
 teal_write_field_input_ITR32 (char *value, void *start_addr) {
 
 	long int_val = strtol (value, NULL, 10);
+
 	int32_t *int32_cast = (int32_t *) start_addr;
 	*int32_cast = (int32_t) int_val;
 
@@ -496,6 +500,7 @@ int
 teal_write_field_input_ITR64 (char *value, void *start_addr) {
 
 	long long int_val = strtoll (value, NULL, 10);
+	
 	int64_t *int64_cast = (int64_t *) start_addr;
 	*int64_cast = (int64_t) int_val;
 
@@ -647,7 +652,7 @@ teal_new_table (char* label, size_t primary_index, char* schema) {
 	teal_free_str_arr (schema_inputs);
 
 	table->n_bytes_schema = table->n_bytes_row;
-	table->n_bytes_row += TYPE_SIZES_BYTES[ __ROW_ID ]; // add space for __ROW_ID
+	table->n_bytes_row += TYPE_SIZES_BYTES[ _ROW_ID ]; // add space for _ROW_ID
 
 	if (primary_index == 0) {
 		table->has_primary = false;
@@ -692,6 +697,7 @@ teal_table_insert_row (teal_tabR table, char *row) {
 		table->bytes_avail = DEF_BYTES_LEN;
 	}
 
+
 	while (table->bytes_avail - table->bytes_used < table->n_bytes_row) {
 		teal_table_grow_bytes (table);
 	}
@@ -700,11 +706,11 @@ teal_table_insert_row (teal_tabR table, char *row) {
 	writer_addr += table->bytes_used;
 
 	size_t *size_t_cast = (size_t *) writer_addr;
-	*size_t_cast = table->n_rows + 1; // write __ROW_ID; starts at idx 1 naturally
+	*size_t_cast = table->n_rows + 1; // write _ROW_ID; starts at idx 1 naturally
 	
 	table->n_rows++;
 
-	writer_addr += TYPE_SIZES_BYTES[ __ROW_ID ];
+	writer_addr += TYPE_SIZES_BYTES[ _ROW_ID ];
 
 	for (size_t i = 0; i < value_count; i++) {
 		( *teal_write_field_fnptrs[ table->schema[i] ] )( split_row[i], writer_addr );
@@ -724,7 +730,7 @@ teal_table_grow_bytes (teal_tabR table) {
 	void *new_bytes = NULL;
 	size_t new_size = table->bytes_avail * BYTES_GROW_FACTOR;
 
-	if( NULL == (new_bytes = __teal_realloc (table->bytes, new_size)) ) {
+	if( NULL == (new_bytes = __teal_realloc (table->bytes, new_size, table->bytes_avail)) ) {
 		return 1;
 	}
 
@@ -736,6 +742,7 @@ teal_table_grow_bytes (teal_tabR table) {
 void
 teal_debug_print_table_info (teal_tabR table) {
 
+	printf ("table info....");
 	printf ("label: %s\n", table->label);
 	printf ("uuid: %s\n", table->uuid);
 	printf ("n_bytes_schema: %zu\n", table->n_bytes_schema);

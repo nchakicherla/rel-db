@@ -17,7 +17,7 @@ void
 __teal_free (void *ptr);
 
 void *
-__teal_realloc (void *ptr, size_t size);
+__teal_realloc (void *ptr, size_t new_size, size_t old_size);
 
 void *
 __teal_shrink_alloc (void *ptr, size_t bytes);

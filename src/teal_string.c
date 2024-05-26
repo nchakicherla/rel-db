@@ -78,7 +78,7 @@ char *
 teal_new_str_from_stdin (void) {
 
 	const size_t buff_len = 256;
-	char *input = __teal_calloc (buff_len, sizeof(char));
+	char *input = __teal_calloc (buff_len, 1);
 	char *end = NULL;
 
 	while (!(end = teal_str_chr (input, '\n', buff_len))) {
@@ -87,6 +87,37 @@ teal_new_str_from_stdin (void) {
 	*end = '\0';
 
 	return input;
+}
+
+char *
+teal_new_str_repeat (char *str, size_t n, char *delim) {
+
+	size_t str_len = teal_str_len (str);
+	size_t delim_len = teal_str_len (delim);
+	size_t total_len = ((str_len + delim_len) * (n - 1)) + str_len;
+
+	char *ret = __teal_calloc (total_len + 1, sizeof(char));
+
+	size_t i;
+	size_t j;
+	size_t k = 0;
+
+	for (i = 0; i < n - 1; i++) {
+		for (j = 0; j < str_len; j++) {
+			ret[k] = str[j];
+			k++;
+		}
+		for (j = 0; j < delim_len; j++) {
+			ret[k] = delim[j];
+			k++;
+		}
+	}
+	for (j = 0; j < str_len; j++) {
+		ret[k] = str[j];
+		k++;
+	}
+	ret[total_len] = '\0';
+	return ret;
 }
 
 char **

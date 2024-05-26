@@ -13,17 +13,18 @@
 #include <ctype.h>
 #include <stddef.h>
 //#include <stdarg.h>
-int teal_write_field_input_CURR (char *value, void *start_addr);
+//int teal_write_field_input_CURR (char *value, void *start_addr);
 
 #include "teal_memory.h"
 #include "teal_string.h"
+#include "teal_csv.h"
 // table->n_cols can't exceed SIZE_MAX - 1
 //
 #define NO_PRIMARY_KEY SIZE_MAX
 #define ROW_ID_INVALID SIZE_MAX	
 
 typedef enum {
-	__ROW_ID = 0,
+	_ROW_ID = 0,
 	STR,
 	ITR32,
 	ITR64,
@@ -40,23 +41,29 @@ typedef struct Teal_Database {
 	char *uuid;
 	size_t n_tables;
 	struct Teal_Table *tables;
+
 } *teal_dbR;
 
 typedef struct Teal_Table {
 	char *label;
 	char *uuid;
+
 	TABLE_FIELD_TYPE *schema;
 	size_t *field_offsets;
 	char **col_labels;
+
 	bool has_primary;
 	size_t primary;
+
 	size_t n_bytes_schema;
 	size_t n_bytes_row;
 	size_t n_cols;
 	size_t n_rows;
 	size_t bytes_avail;
 	size_t bytes_used;
+
 	void *bytes;
+
 } *teal_tabR;
 
 typedef struct Teal_Reference_Field {

@@ -12,6 +12,7 @@
 #include "teal_db.h"
 #include "teal_csv.h"
 
+#define BIGNUM 50
 
 char *TABLE_TEST_COLUMN_LABELS[] = 
 {
@@ -34,32 +35,49 @@ int main (void) {
 	
 	if (table) {
 		teal_table_update_labels (table, TABLE_TEST_COLUMN_LABELS);
+		printf ("updated labels\n");
+		int ret1 = teal_table_insert_row (table, "test,32,234567,7.2,false,4-1-1980,52.43,k");
+		int ret2 = teal_table_insert_row (table, "test,48,345456,3.14,true,1-1-1700,52.43,k");
+		int ret3 = teal_table_insert_row (table, "test,64,456678,6.11,false,1-3-1800,52.43,k");
 
-		int ret1 = teal_table_insert_row (table, "test,32,64,7.2,true,3-3-2023,52.43,k");
-		//teal_debug_print_table_info(table);
-		int ret2 = teal_table_insert_row (table, "test,32,64,7.2,true,3-3-2023,52.43,k");
-		//teal_debug_print_table_info(table);
-		int ret3 = teal_table_insert_row (table, "test,32,64,7.2,true,3-3-2023,52.43,k");
-		//teal_debug_print_table_info(table);
 		if (ret1 || ret2 || ret3) {
 			printf ("failed!\n");
 		} else {
 			printf ("passed!\n");
 		}
-		//printf("adding many rows...\n");
-		for (size_t i = 4; i <= 10; i++) {
+
+		printf ("adding many rows...\n");
+		for (size_t i = 3; i < BIGNUM; i++) {
 			teal_table_insert_row (table, "test,32,64,7.2,fAlse,3-3-2023,52.43,k");
 		}
-		for (size_t i = 1; i <= 10; i++) {
+		printf ("rows added!\n");
+
+		printf ("printing...\n");
+		for (size_t i = 0; i < BIGNUM; i++) {
 			teal_print_row (table, teal_get_row_addr (table, i) );
 		}
+
 		teal_table_free (&table);
 	}
 
-	teal_csvR csv = teal_new_csv ("./resources/housewares.csv");
+	printf ("reading csv...\n");
+	teal_csvR csv = teal_new_csv ("./resources/reactions.csv");
+	printf ("csv read!\n");
 
-	for (size_t i = 0; i < csv->n_rows; i++) {
-		printf ("%zu\t%s\n", i + 1, csv->rows[i]);
+	if (csv) {
+
+		char *assembled_schema = teal_new_str_repeat ("STR", csv->n_cols, " ");
+
+		teal_tabR csv_table = teal_new_table ("CSV Table", NO_PRIMARY_KEY, assembled_schema);
+		__teal_free(assembled_schema);
+
+		for (size_t i = 0; i < csv->n_rows; i++) {
+			teal_table_insert_row (csv_table, csv->rows[i]);
+			teal_print_row (csv_table, teal_get_row_addr (csv_table, i));
+		}
+
+		printf("n_cols: %zu\n", csv->n_cols);
+		teal_table_free (&csv_table);
 	}
 
 	teal_free_csv (&csv);

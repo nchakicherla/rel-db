@@ -9,8 +9,11 @@
 
 typedef struct Teal_Raw_CSV {
 	char *source_file;
+	bool validated;
 	size_t n_rows;
-	char** rows;
+	size_t n_cols;
+	char **labels;
+	char **rows;
 } *teal_csvR;
 
 teal_csvR 
