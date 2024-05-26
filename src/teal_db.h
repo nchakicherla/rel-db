@@ -15,17 +15,18 @@
 //#include <stdarg.h>
 int teal_write_field_input_CURR(char *value, void *start_addr);
 
+#include "teal_memory.h"
 #include "teal_string.h"
 // table->n_cols can't exceed SIZE_MAX - 1
 //
-#define NO_PRIMARY_KEY				SIZE_MAX
-#define ROW_ID_INVALID				SIZE_MAX	
+#define NO_PRIMARY_KEY SIZE_MAX
+#define ROW_ID_INVALID SIZE_MAX	
 
 typedef enum {
 	STR = 0,
 	ITR32,
 	ITR64,
-	DBL,
+	FLT,
 	BLN,
 	DATE,
 	CURR,

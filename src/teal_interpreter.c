@@ -5,7 +5,7 @@ typedef enum
 {
 	END = 0,
 	INT,
-	DBL,
+	FLT,
 	STR,
 } FELT_TOK_TYPE;
 
