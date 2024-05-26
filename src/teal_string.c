@@ -14,7 +14,7 @@ char *
 teal_str_dup(char* str) {
 
 	size_t len = teal_str_len(str);
-	char *new_str = teal_calloc(len + 1, sizeof(char));
+	char *new_str = __teal_calloc(len + 1, sizeof(char));
 
 	for (size_t i = 0; i < len; i++) {
 		new_str[i] = str[i];
@@ -76,7 +76,7 @@ char *
 teal_new_str_from_stdin(void) {
 
 	const size_t buff_len = 256;
-	char *input = teal_calloc(buff_len, sizeof(char));
+	char *input = __teal_calloc(buff_len, sizeof(char));
 	char *end = NULL;
 
 	while (!(end = teal_str_chr(input, '\n', buff_len))) {
@@ -97,7 +97,7 @@ teal_new_arr_from_str(char *str, char *delim, size_t *count) {
 			i += teal_str_len(delim) - 1;
 		}
 	}
-	char **output = teal_calloc((*count) + 1, sizeof(char *));
+	char **output = __teal_calloc((*count) + 1, sizeof(char *));
 	output[*count] = NULL;
 
 	char* start = str;
@@ -107,7 +107,7 @@ teal_new_arr_from_str(char *str, char *delim, size_t *count) {
 			end++;
 		}
 		size_t tok_len = (size_t)(end - start);
-		output[i] = teal_calloc(tok_len + 1, sizeof(char));
+		output[i] = __teal_calloc(tok_len + 1, sizeof(char));
 		for (size_t j = 0; j < tok_len; j++) {
 			output[i][j] = *start;
 			start++;

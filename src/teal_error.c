@@ -15,7 +15,7 @@ typedef struct Teal_Maybe_Return {
 
 teal_msgR
 teal_new_message(int32_t code, char* msg, char* fn) {
-	teal_msgR new_msg = teal_calloc(1, sizeof(struct Teal_Message));
+	teal_msgR new_msg = __teal_calloc(1, sizeof(struct Teal_Message));
 	new_msg->code = code;
 	new_msg->msg = teal_str_dup(msg);
 	new_msg->fn = teal_str_dup(fn);
@@ -24,7 +24,7 @@ teal_new_message(int32_t code, char* msg, char* fn) {
 
 teal_maybeR
 teal_new_maybe(int32_t code, void* data) {
-	teal_maybeR new_maybe = teal_calloc(1, sizeof(struct Teal_Maybe_Return));
+	teal_maybeR new_maybe = __teal_calloc(1, sizeof(struct Teal_Maybe_Return));
 	new_maybe->code = code;
 	new_maybe->data = data;
 	return new_maybe;

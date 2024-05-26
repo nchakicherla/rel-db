@@ -1,11 +1,15 @@
 #include "teal_db.h"
 
-#define TEAL_STR_TYPE_MAX_LEN 				512
-#define TEAL_TABLE_DEFAULT_BYTES			512
-#define NUM_IMPLEMENTED_TYPES				9
+#define META_NUM_TYPES_IMPLEMENTED				8
 
-bool teal_input_validate_fns_set=false;
-bool teal_field_writer_fns_set=false;
+
+//#define TEAL_STR_TYPE_MAX_LEN 				512
+#define DATA_BUFFER_DEFAULT_SIZE				512
+#define DATA_BUFFER_GROWTH_FACTOR				2.0f
+
+bool teal_validate_input_fnptrs_set = 		false;
+bool teal_write_field_fnptrs_set = 			false;
+bool teal_print_field_value_fnptrs_set = 	false;
 
 char *TEAL_FIELD_TYPE_NAMES[] = 
 
@@ -36,25 +40,142 @@ const size_t TEAL_FIELD_TYPE_SIZES[] =
 				sizeof(teal_field_reference) };
 
 void
+teal_print_field_value_STR(void *addr) {
+	printf("%s", *(char **) addr);
+	return;
+}
+
+void
+teal_print_field_value_ITR32(void *addr) {
+	printf("%" PRId32 "", *(int32_t *) addr);
+	return;
+}
+
+void
+teal_print_field_value_ITR64(void *addr) {
+	printf("%" PRId64 "", *(int64_t *) addr);
+	return;
+}
+
+void 
+teal_print_field_value_DBL(void *addr) {
+	printf("%f", *(double *) addr);
+	return;
+}
+
+void
+teal_print_field_value_BLN(void *addr) {
+	if (true == *(bool *) addr) {
+		printf("TRUE");
+	} else {
+		printf("FALSE");
+	}
+	return;
+}
+
+void 
+teal_print_field_value_DATE(void *addr) {
+	char* ptr = (char *) addr;
+	printf("%" PRIu16 "/", *(uint16_t *) ptr);
+	printf("%" PRIu8 "/", *(uint8_t *)(ptr + sizeof(uint16_t)));
+	printf("%" PRIu8 "", *(uint8_t *)(ptr + sizeof(uint16_t) + sizeof(uint8_t)));
+	return;
+}
+
+void 
+teal_print_field_value_CURR(void *addr) {
+	char *ptr = (char *) addr;
+	printf("$%" PRId64 ".", *(int64_t *)ptr);
+	printf("%" PRIu8 "", *(uint8_t *)(ptr + sizeof(int64_t)));
+	return;
+}
+
+void 
+teal_print_field_value_CH(void *addr) {
+	char *ptr = (char *) addr;
+	printf("%c", *ptr);
+	return;
+}
+
+void (*teal_print_field_value_fnptrs[META_NUM_TYPES_IMPLEMENTED]) (void *addr);
+
+int 
+teal_set_print_field_value_fnptrs(void) {
+	teal_print_field_value_fnptrs[STR] = teal_print_field_value_STR;
+	teal_print_field_value_fnptrs[ITR32] = teal_print_field_value_ITR32;
+	teal_print_field_value_fnptrs[ITR64] = teal_print_field_value_ITR64;
+	teal_print_field_value_fnptrs[DBL] = teal_print_field_value_DBL;
+	teal_print_field_value_fnptrs[BLN] = teal_print_field_value_BLN;
+	teal_print_field_value_fnptrs[DATE] = teal_print_field_value_DATE;
+	teal_print_field_value_fnptrs[CURR] = teal_print_field_value_CURR;
+	teal_print_field_value_fnptrs[CH] = teal_print_field_value_CH;
+
+	teal_print_field_value_fnptrs_set = true;
+	return 0;
+}
+/*
+int
+teal_set_validate_input_fnptrs(void) {
+
+	teal_validate_input_fnptrs[STR] = teal_validate_input_STR;
+	teal_validate_input_fnptrs[ITR32] = teal_validate_input_ITR32;
+	teal_validate_input_fnptrs[ITR64] = teal_validate_input_ITR64;
+	teal_validate_input_fnptrs[DBL] = teal_validate_input_DBL;
+	teal_validate_input_fnptrs[BLN] = teal_validate_input_BLN;
+	teal_validate_input_fnptrs[DATE] = teal_validate_input_DATE;
+	teal_validate_input_fnptrs[CURR] = teal_validate_input_CURR;
+	teal_validate_input_fnptrs[CH] = teal_validate_input_CH;
+//	teal_validate_input_fnptrs[8] = teal_row_input_valid_REF;
+	teal_validate_input_fnptrs_set = true;
+	return 0;
+}
+*/
+
+void *
+teal_get_row_addr(teal_tabR table, size_t ind) {
+
+	void *addr = (char *)table->bytes + ((ind - 1) * table->n_bytes_row);
+	return addr;
+}
+
+void
+teal_print_row(teal_tabR table, void *addr) {
+
+	char *ptr = addr;
+	printf("%zu\t",  *(size_t *) ptr);
+	ptr += TEAL_FIELD_TYPE_SIZES[ROW_ID];
+
+	for (size_t i = 0; i < table->n_cols; i++) {
+		(*teal_print_field_value_fnptrs[table->schema[i]])((char *)ptr + table->field_offsets[i]);
+		if (i < table->n_cols - 1) {
+			printf(", ");
+		} else {
+			printf("\n");
+		}
+	}
+	return;
+}
+
+void
 teal_table_free(teal_tabR *teal_tabRR) {
 	
-	teal_table_free_bytes(*teal_tabRR); // frees any allocations
-	free((*teal_tabRR)->label);
-	free((*teal_tabRR)->uuid);
-	free((*teal_tabRR)->schema);
-	free((*teal_tabRR)->field_offsets);
+	teal_table_free_str_allocs(*teal_tabRR); // frees any allocations
+	__teal_free((*teal_tabRR)->label);
+	__teal_free((*teal_tabRR)->uuid);
+	__teal_free((*teal_tabRR)->schema);
+	__teal_free((*teal_tabRR)->field_offsets);
 	for (size_t i = 0; i < (*teal_tabRR)->n_cols; i++) {
-		teal_free((*teal_tabRR)->col_labels[i]);
+		__teal_free((*teal_tabRR)->col_labels[i]);
 	}
-	free((*teal_tabRR)->col_labels);
-	free((*teal_tabRR)->bytes);
-	free(*teal_tabRR);
+	__teal_free((*teal_tabRR)->col_labels);
+	__teal_free((*teal_tabRR)->bytes);
+	__teal_free(*teal_tabRR);
 	*teal_tabRR = NULL;
 	return;
 }
 
 void
-teal_table_free_bytes(teal_tabR table) {
+teal_table_free_str_allocs(teal_tabR table) {
 
 	size_t total_offset;
 	for (size_t i = 0; i < table->n_rows; i++) {
@@ -83,6 +204,9 @@ int
 teal_table_update_labels(teal_tabR table, char **labels) {
 
 	for (size_t i = 0; i < table->n_cols; i++) {
+		if (table->col_labels[i]) {
+			free(table->col_labels[i]);
+		}
 		table->col_labels[i] = teal_str_dup(labels[i]);
 	}
 	return 0;
@@ -90,10 +214,12 @@ teal_table_update_labels(teal_tabR table, char **labels) {
 
 bool
 teal_validate_input_STR(char* value) {
-
+	// always valid
+	/*
 	if (teal_str_len(value) >= TEAL_STR_TYPE_MAX_LEN) {
 		return false;
 	}
+	*/
 	return true;
 }
 
@@ -156,10 +282,10 @@ teal_validate_input_BLN(char *value) {
 		test[i] = toupper(test[i]);
 	}
 	if (teal_str_same(test, "TRUE") || teal_str_same(test, "TRUE")) {
-		free(test);
+		__teal_free(test);
 		return true;
 	}
-	free(test);
+	__teal_free(test);
 	return false;
 }
 
@@ -249,30 +375,30 @@ teal_validate_input_CH(char* value) {
 	return true;
 }
 
-bool (*teal_is_input_valid[NUM_IMPLEMENTED_TYPES]) (char *value);
+bool (*teal_validate_input_fnptrs[META_NUM_TYPES_IMPLEMENTED]) (char *value);
 
 int
-teal_set_validation_fns(void) {
+teal_set_validate_input_fnptrs(void) {
 
-	teal_is_input_valid[STR] = teal_validate_input_STR;
-	teal_is_input_valid[ITR32] = teal_validate_input_ITR32;
-	teal_is_input_valid[ITR64] = teal_validate_input_ITR64;
-	teal_is_input_valid[DBL] = teal_validate_input_DBL;
-	teal_is_input_valid[BLN] = teal_validate_input_BLN;
-	teal_is_input_valid[DATE] = teal_validate_input_DATE;
-	teal_is_input_valid[CURR] = teal_validate_input_CURR;
-	teal_is_input_valid[CH] = teal_validate_input_CH;
+	teal_validate_input_fnptrs[STR] = teal_validate_input_STR;
+	teal_validate_input_fnptrs[ITR32] = teal_validate_input_ITR32;
+	teal_validate_input_fnptrs[ITR64] = teal_validate_input_ITR64;
+	teal_validate_input_fnptrs[DBL] = teal_validate_input_DBL;
+	teal_validate_input_fnptrs[BLN] = teal_validate_input_BLN;
+	teal_validate_input_fnptrs[DATE] = teal_validate_input_DATE;
+	teal_validate_input_fnptrs[CURR] = teal_validate_input_CURR;
+	teal_validate_input_fnptrs[CH] = teal_validate_input_CH;
 	/*
-	teal_is_input_valid[8] = teal_row_input_valid_REF;
+	teal_validate_input_fnptrs[8] = teal_row_input_valid_REF;
 	*/
-	teal_input_validate_fns_set = true;
+	teal_validate_input_fnptrs_set = true;
 	return 0;
 }
 
 int 
 teal_write_field_input_STR(char *value, void *start_addr) {
 	size_t len = teal_str_len(value);
-	char* alloc = teal_calloc(len + 1, sizeof(char));
+	char* alloc = __teal_calloc(len + 1, sizeof(char));
 	for (size_t i = 0; i < len; i++) {
 		alloc[i] = value[i];
 	}
@@ -325,10 +451,10 @@ teal_write_field_input_BLN(char *value, void *start_addr) {
 	} else {
 		*bool_cast = false;
 	}
-	free(alloc);
+	__teal_free(alloc);
 	return 0;
-
 }
+
 int 
 teal_write_field_input_DATE(char *value, void *start_addr) {
 
@@ -361,7 +487,7 @@ teal_write_field_input_CURR(char *value, void *start_addr) {
 	*int64_cast = dollar_val;
 
 	uint8_t *uint8_cast = (uint8_t *) start_addr;
-	*(uint8_cast + 4) = cent_val;
+	*(uint8_cast + (sizeof(int64_t) / sizeof(uint8_t))) = cent_val;
 
 	return 0;
 }
@@ -372,49 +498,53 @@ teal_write_field_input_CH(char *value, void *start_addr) {
 	char *char_cast = (char *) start_addr;
 	*char_cast = *value;
 	return 0;
-
 }
 /*
 int teal_write_field_input_REF(char *value, void *start_addr);
 */
-int (*teal_field_write_ptrs[NUM_IMPLEMENTED_TYPES])(char *value, void *start_addr);
+int (*teal_write_field_fnptrs[META_NUM_TYPES_IMPLEMENTED])(char *value, void *start_addr);
 
 int
-teal_set_write_field_input_fns(void) {
-	teal_field_write_ptrs[STR] = teal_write_field_input_STR;
-	teal_field_write_ptrs[ITR32] = teal_write_field_input_ITR32;
-	teal_field_write_ptrs[ITR64] = teal_write_field_input_ITR64;
-	teal_field_write_ptrs[DBL] = teal_write_field_input_DBL;
-	teal_field_write_ptrs[BLN] = teal_write_field_input_BLN;
-	teal_field_write_ptrs[DATE] = teal_write_field_input_DATE;
-	teal_field_write_ptrs[CURR] = teal_write_field_input_CURR;
-	teal_field_write_ptrs[CH] = teal_write_field_input_CH;
+teal_set_write_field_fnptrs(void) {
+	teal_write_field_fnptrs[STR] = teal_write_field_input_STR;
+	teal_write_field_fnptrs[ITR32] = teal_write_field_input_ITR32;
+	teal_write_field_fnptrs[ITR64] = teal_write_field_input_ITR64;
+	teal_write_field_fnptrs[DBL] = teal_write_field_input_DBL;
+	teal_write_field_fnptrs[BLN] = teal_write_field_input_BLN;
+	teal_write_field_fnptrs[DATE] = teal_write_field_input_DATE;
+	teal_write_field_fnptrs[CURR] = teal_write_field_input_CURR;
+	teal_write_field_fnptrs[CH] = teal_write_field_input_CH;
+
+	teal_write_field_fnptrs_set = true;
 	return 0;
 }
 
 teal_tabR
 teal_new_table(char* label, size_t primary_index, char* schema) {
 
-	if (!teal_input_validate_fns_set) {
-		teal_set_validation_fns();
+	if (!teal_validate_input_fnptrs_set) {
+		teal_set_validate_input_fnptrs();
 	}
-	if (!teal_field_writer_fns_set) {
-		teal_set_write_field_input_fns();
+	if (!teal_write_field_fnptrs_set) {
+		teal_set_write_field_fnptrs();
+	}
+	if (!teal_print_field_value_fnptrs_set) {
+		teal_set_print_field_value_fnptrs();
 	}
 
-	teal_tabR table = teal_calloc(1, sizeof(struct Teal_Table));
+	teal_tabR table = __teal_calloc(1, sizeof(struct Teal_Table));
 	table->label = teal_str_dup(label);
 
 	uuid_t bin_uuid;
 	uuid_generate_random(bin_uuid);
-	table->uuid = teal_calloc(UUID_STR_LEN + 1, sizeof(char));
+	table->uuid = __teal_calloc(UUID_STR_LEN + 1, sizeof(char));
 	uuid_unparse_upper(bin_uuid, table->uuid);
 
 	char **schema_inputs = teal_new_arr_from_str(schema, " ", &(table->n_cols));
 	
-	table->col_labels = teal_calloc(table->n_cols, sizeof(char *));
-	table->schema = teal_calloc(table->n_cols, sizeof(TABLE_FIELD_TYPE));
-	table->field_offsets = teal_calloc(table->n_cols, sizeof(size_t));
+	table->col_labels = __teal_calloc(table->n_cols, sizeof(char *));
+	table->schema = __teal_calloc(table->n_cols, sizeof(TABLE_FIELD_TYPE));
+	table->field_offsets = __teal_calloc(table->n_cols, sizeof(size_t));
 
 	for (size_t i = 0; i < table->n_cols; i++) {
 
@@ -443,11 +573,11 @@ teal_new_table(char* label, size_t primary_index, char* schema) {
 
 cancel:
 	teal_free_str_arr(schema_inputs);
-	free(table->label);
-	free(table->uuid);
-	free(table->schema);
-	free(table->col_labels);
-	free(table);
+	__teal_free(table->label);
+	__teal_free(table->uuid);
+	__teal_free(table->schema);
+	__teal_free(table->col_labels);
+	__teal_free(table);
 	return NULL;
 }
 
@@ -466,32 +596,32 @@ teal_table_insert_row(teal_tabR table, char *row) {
 	for (size_t i = 0; i < value_count; i++) {
 		bool result = false;
 		if (!(result = 
-				(*teal_is_input_valid[table->schema[i]])(split_row[i]))) {
+				(*teal_validate_input_fnptrs[table->schema[i]])(split_row[i]))) {
 			ret = 2;
 			goto cleanup;
 		}
 	}
 	if (!table->bytes) {
-		table->bytes = teal_calloc(TEAL_TABLE_DEFAULT_BYTES, sizeof(char));
-		table->bytes_avail = TEAL_TABLE_DEFAULT_BYTES;
+		table->bytes = __teal_calloc(DATA_BUFFER_DEFAULT_SIZE, sizeof(char));
+		table->bytes_avail = DATA_BUFFER_DEFAULT_SIZE;
 
 	}
-	while (table->bytes_avail < table->n_bytes_row) {
-		teal_table_grow_bytes_2x(table);
+	while (table->bytes_avail - table->bytes_used < table->n_bytes_row) {
+		teal_table_grow_bytes(table);
 	}
 
 	char *writer_addr = (char *) table->bytes;
 	writer_addr += table->bytes_used;
 
 	size_t *size_t_cast = (size_t *) writer_addr;
-	*size_t_cast = table->n_rows + 1; // write ROW_ID
+	*size_t_cast = table->n_rows + 1; // write ROW_ID; starts at idx 1 naturally
 	
 	table->n_rows++;
 
 	writer_addr += TEAL_FIELD_TYPE_SIZES[ROW_ID];
 
 	for (size_t i = 0; i < value_count; i++) {
-		(*teal_field_write_ptrs[table->schema[i]])(split_row[i], writer_addr);
+		(*teal_write_field_fnptrs[table->schema[i]])(split_row[i], writer_addr);
 		writer_addr += TEAL_FIELD_TYPE_SIZES[table->schema[i]];
 	}
 
@@ -503,13 +633,19 @@ cleanup:
 }
 
 int
-teal_table_grow_bytes_2x(teal_tabR table) {
+teal_table_grow_bytes(teal_tabR table) {
 
-	teal_grow_alloc(table->bytes, 2 * table->bytes_avail);
-	table->bytes_avail *= 2;
+	void *new_bytes = NULL;
+	size_t new_size = table->bytes_avail * DATA_BUFFER_GROWTH_FACTOR;
+
+	if(!(new_bytes = __teal_realloc(table->bytes, new_size))) {
+		return 1;
+	}
+
+	table->bytes = new_bytes;
+	table->bytes_avail = new_size;
 	return 0;
 }
-
 
 void
 teal_debug_print_table_info(teal_tabR table) {

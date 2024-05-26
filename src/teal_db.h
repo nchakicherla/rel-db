@@ -2,6 +2,7 @@
 #define TEAL_DB_H
 
 #include <stdint.h>
+#include <inttypes.h>
 #include <stdlib.h>
 #include <uuid/uuid.h>
 #include <stdbool.h>
@@ -18,7 +19,7 @@ int teal_write_field_input_CURR(char *value, void *start_addr);
 // table->n_cols can't exceed SIZE_MAX - 1
 //
 #define NO_PRIMARY_KEY				SIZE_MAX
-#define ROW_ID_INVALID				SIZE_MAX		
+#define ROW_ID_INVALID				SIZE_MAX	
 
 typedef enum {
 	STR = 0,
@@ -64,6 +65,12 @@ typedef struct Teal_Reference_Field {
 	size_t col;
 } teal_field_reference;
 
+void *
+teal_get_row_addr(teal_tabR table, size_t ind);
+
+void
+teal_print_row(teal_tabR table, void *addr);
+
 teal_tabR
 teal_new_table(char* label, size_t primary_index, char* schema);
 
@@ -71,7 +78,7 @@ void
 teal_table_free(teal_tabR *teal_tabRR);
 
 void
-teal_table_free_bytes(teal_tabR table);
+teal_table_free_str_allocs(teal_tabR table);
 
 int
 teal_table_update_labels(teal_tabR table, char **labels);
@@ -80,10 +87,10 @@ int
 teal_table_insert_row(teal_tabR table, char *row);
 
 int
-teal_table_grow_bytes_2x(teal_tabR table);
+teal_table_grow_bytes(teal_tabR table);
 
 int
-teal_set_validation_fns(void);
+teal_set_validate_input_fnptrs(void);
 
 int
 teal_set_write_row_field_fns(void);

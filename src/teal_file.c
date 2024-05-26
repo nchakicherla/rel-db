@@ -15,7 +15,7 @@ teal_new_str_from_file(char *name) {
 	size = ftell(file);
 	fseek(file, 0, SEEK_SET);
 	
-	output = teal_calloc(size + 1, sizeof(char));
+	output = __teal_calloc(size + 1, sizeof(char));
 	fread(output, size, 1, file);
 	output[size] = '\0';
 	
