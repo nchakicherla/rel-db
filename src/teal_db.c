@@ -408,7 +408,13 @@ validate_input_CH (char* value) {
 int 
 write_field_STR (char *value, void *start_addr) {
 
-	size_t len = teal_str_len (value);
+	size_t len;
+
+	if (0 == (len = teal_str_len (value))) {
+		memset (start_addr, '\0', sizeof(char *));
+		return 0;
+	}
+
 	char* alloc = impl_calloc (len + 1, sizeof(char));
 
 	for (size_t i = 0; i < len; i++) {
@@ -615,7 +621,7 @@ void
 teal_print_row_at_addr (teal_tabR table, void *addr) {
 
 	char *ptr = addr;
-	printf ("%zu\t",  *(size_t *) ptr);
+	printf ("%zu\t",  *(size_t *) ptr); // print ROW_ID
 	ptr += TYPE_SIZES_BYTES[ _ROW_ID ];
 
 	for ( size_t i = 0; i < table->n_cols; i++ ) {
@@ -634,13 +640,13 @@ teal_print_row_at_addr (teal_tabR table, void *addr) {
 teal_tabR
 teal_new_table (char* label, char* schema, size_t n_cols, size_t primary_index) {
 
-	if (false == input_valid_ptrs_set) {
+	if (!input_valid_ptrs_set) {
 		set_validation_fns ();
 	}
-	if (false == write_field_ptrs_set) {
+	if (!write_field_ptrs_set) {
 		set_write_fns ();
 	}
-	if (false == print_field_ptrs_set) {
+	if (!print_field_ptrs_set) {
 		set_print_fns ();
 	}
 

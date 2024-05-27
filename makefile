@@ -7,7 +7,7 @@ mkObjDir := $(shell mkdir -p obj)
 
 MAIN = 	./obj/main.o
 
-OBJS = 	./obj/teal_memory.o \
+OBJS = 		./obj/teal_memory.o \
 		./obj/teal_error.o \
 		./obj/teal_string.o \
 		./obj/teal_interpreter.o \

@@ -12,7 +12,7 @@
 #include "teal_db.h"
 #include "teal_csv.h"
 
-#define BIGNUM 50
+
 
 int main (void) {
 
@@ -26,20 +26,13 @@ int main (void) {
 		printf ("csv read!\n");
 
 		struct Teal_Table *csv_table = teal_new_table ("CSV Table", NULL, csv->n_cols, NO_PRIMARY_KEY);
-
-		for (size_t i = 0; i < csv->n_rows; i++) { // load each csv row into table
-			teal_table_insert_row (csv_table, csv->rows[i]);
-			//teal_print_row_at_addr (csv_table, teal_get_row_addr (csv_table, i));
+		for (size_t k = 0; k < 1; k++) {
+			printf("k: %zu\n", k);
+			for (size_t i = 0; i < csv->n_rows; i++) { // load each csv row into table
+				teal_table_insert_row (csv_table, csv->rows[i]);
+				//teal_print_row_at_addr (csv_table, teal_get_row_addr (csv_table, i));
+			}
 		}
-		for (size_t i = 0; i < csv->n_rows; i++) { // load each csv row into table
-			teal_table_insert_row (csv_table, csv->rows[i]);
-			//teal_print_row_at_addr (csv_table, teal_get_row_addr (csv_table, i));
-		}
-		for (size_t i = 0; i < csv->n_rows; i++) { // load each csv row into table
-			teal_table_insert_row (csv_table, csv->rows[i]);
-			//teal_print_row_at_addr (csv_table, teal_get_row_addr (csv_table, i));
-		}
-
 		teal_debug_print_table_info (csv_table);
 
 		teal_print_table (csv_table);
@@ -64,7 +57,7 @@ char *TABLE_TEST_COLUMN_LABELS[] =
 	"test8",
 	NULL};
 
-
+#define BIGNUM 50
 	teal_tabR table = teal_new_table ("My Table", NO_PRIMARY_KEY, "STR ITR32 ITR64 FLT BLN DATE CURR CH");
 	
 	if (table) {

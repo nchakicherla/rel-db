@@ -28,11 +28,11 @@ impl_calloc (size_t n, size_t size) {
 
 void
 impl_free (void *ptr) {
-
+/*
 	if (!ptr) {
 		return;
 	}
-
+*/
 	free_impl_fn (ptr);
 	return;
 }
