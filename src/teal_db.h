@@ -80,7 +80,7 @@ void
 teal_print_row_at_addr (teal_tabR table, void *addr);
 
 teal_tabR
-teal_new_table (char* label, char* schema, size_t primary_index, size_t n_cols);
+teal_new_table (char* label, char* schema, size_t n_cols, size_t primary_index);
 
 void
 teal_table_free (teal_tabR *teal_tabRR);

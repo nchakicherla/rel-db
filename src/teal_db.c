@@ -611,7 +611,7 @@ teal_set_write_field_fnptrs (void) {
 }
 
 teal_tabR
-teal_new_table (char* label, char* schema, size_t primary_index, size_t n_cols) {
+teal_new_table (char* label, char* schema, size_t n_cols, size_t primary_index) {
 
 	if (false == input_valid_ptrs_set) {
 		teal_set_validate_input_fnptrs ();
