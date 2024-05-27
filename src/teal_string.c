@@ -172,11 +172,10 @@ teal_new_arr_from_str_safety (char *str, char *delim, char *safety, size_t *coun
 		if (teal_is_substr_at_addr (&str[i], safety)) {
 			if (in_safety == false) {
 				in_safety = true;
-				i += safety_len - 1;
 			}  else {
 				in_safety = false;
-				i += safety_len - 1;
 			}
+			i += safety_len - 1;
 		}
 		if (teal_is_substr_at_addr (&str[i], delim) && !in_safety) {
 			(*count)++;
