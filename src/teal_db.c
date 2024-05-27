@@ -159,76 +159,84 @@ mara_new_parsed_float (char *str) { // taken from my mara library
     return parsed_flt;
 }
 
-void 
-print_field_STR (void *addr) {
+int  
+fprint_field_STR (FILE* stream, void *addr) {
 
-	printf ("%s", *(char **) addr);
-	return;
+	//char *str_cast = *(char **) addr;
+	if (NULL == *(char **) addr) {
+		return (fprintf (stream, "[nil]"));
+	} else {
+		return (fprintf (stream, "%s", *(char **) addr));
+	}
+	//return;
 }
 
-void 
-print_field_ITR32 (void *addr) {
+int  
+fprint_field_ITR32 (FILE* stream, void *addr) {
 
-	printf ("%" PRId32 "", *(int32_t *) addr);
-	return;
+	return (fprintf (stream, "%" PRId32 "", *(int32_t *) addr));
 }
 
-void 
-print_field_ITR64 (void *addr) {
+int 
+fprint_field_ITR64 (FILE* stream, void *addr) {
 
-	printf ("%" PRId64 "", *(int64_t *) addr);
-	return;
+	;
+	return (fprintf (stream, "%" PRId64 "", *(int64_t *) addr));
 }
 
-void 
-print_field_DBL (void *addr) {
+int  
+fprint_field_DBL (FILE* stream, void *addr) {
 
 	double val = *(double *) addr;
 	int frac_digs = *(int *)((char *) addr + sizeof(double));
 
-	printf ("%.*f", frac_digs, val);
-	return;
+	;
+	return (fprintf (stream, "%.*f", frac_digs, val));
 }
 
-void 
-print_field_BLN (void *addr) {
+int  
+fprint_field_BLN (FILE* stream, void *addr) {
 
 	if (true == *(bool *) addr) {
-		printf ("TRUE");
+		return (fprintf (stream, "TRUE"));
 	} else {
-		printf ("FALSE");
+		return (fprintf (stream, "FALSE"));
 	}
-	return;
+	//return;
 }
 
-void 
-print_field_DATE (void *addr) {
+int  
+fprint_field_DATE (FILE* stream, void *addr) {
 
 	char* ptr = (char *) addr;
+	int ret = 0;
 	// month
-	printf ("%" PRIu8 "/", *(uint8_t *)(ptr + sizeof(uint16_t)));
+	ret += fprintf (stream, "%" PRIu8 "/", *(uint8_t *)(ptr + sizeof(uint16_t)));
 	// day
-	printf ("%" PRIu8 "/", *(uint8_t *)(ptr + sizeof(uint16_t) + sizeof(uint8_t)));
+	ret += fprintf (stream, "%" PRIu8 "/", *(uint8_t *)(ptr + sizeof(uint16_t) + sizeof(uint8_t)));
 	// year
-	printf ("%" PRIu16 "", *(uint16_t *) ptr);
-	return;
+	ret += fprintf (stream, "%" PRIu16 "", *(uint16_t *) ptr);
+	return ret;
 }
 
-void 
-print_field_CURR (void *addr) {
+int  
+fprint_field_CURR (FILE* stream, void *addr) {
 
 	char *ptr = (char *) addr;
-	printf ("$%" PRId64 ".", *(int64_t *)ptr);
-	printf ("%" PRIu8 "", *(uint8_t *)(ptr + sizeof(int64_t)));
-	return;
+	int ret = 0;
+
+	ret += fprintf (stream, "$%" PRId64 ".", *(int64_t *)ptr);
+	ret += fprintf (stream, "%" PRIu8 "", *(uint8_t *)(ptr + sizeof(int64_t)));
+
+	return ret;
 }
 
-void 
-print_field_CH (void *addr) {
+int  
+fprint_field_CH (FILE* stream, void *addr) {
 
 	char *ptr = (char *) addr;
-	printf ("%c", *ptr);
-	return;
+	;
+	return (fprintf (stream, "%c", *ptr));
 }
 
 bool 
@@ -501,7 +509,7 @@ write_field_DATE (char *value, void *start_addr) {
 }
 
 int 
-write_field_CURR(char *value, void *start_addr) {
+write_field_CURR (char *value, void *start_addr) {
 
 	size_t count = 0;
 	char **split = teal_new_arr_from_str (value, ".", &count);
@@ -528,8 +536,8 @@ write_field_CH (char *value, void *start_addr) {
 	return 0;
 }
 
-void 
-(*printing_fns [NUM_TYPES_IMPL] ) (void *addr);
+int 
+(*fprint_fns [NUM_TYPES_IMPL] ) (FILE* stream, void *addr);
 
 bool 
 (*validation_fns [NUM_TYPES_IMPL] ) (char *value);
@@ -537,17 +545,17 @@ bool
 int 
 (*writing_fns [NUM_TYPES_IMPL] ) (char *value, void *start_addr);
 
-void  
+void 
 set_print_fns (void) {
 
-	printing_fns[STR] = print_field_STR;
-	printing_fns[ITR32] = print_field_ITR32;
-	printing_fns[ITR64] = print_field_ITR64;
-	printing_fns[FLT] = print_field_DBL;
-	printing_fns[BLN] = print_field_BLN;
-	printing_fns[DATE] = print_field_DATE;
-	printing_fns[CURR] = print_field_CURR;
-	printing_fns[CH] = print_field_CH;
+	fprint_fns[STR] = fprint_field_STR;
+	fprint_fns[ITR32] = fprint_field_ITR32;
+	fprint_fns[ITR64] = fprint_field_ITR64;
+	fprint_fns[FLT] = fprint_field_DBL;
+	fprint_fns[BLN] = fprint_field_BLN;
+	fprint_fns[DATE] = fprint_field_DATE;
+	fprint_fns[CURR] = fprint_field_CURR;
+	fprint_fns[CH] = fprint_field_CH;
 
 	print_field_ptrs_set = true;
 	return;
@@ -604,8 +612,11 @@ void
 teal_print_table (teal_tabR table) {
 
 	char *row_ptr = table->bytes;
+	int n_chars = 0;
 	for (size_t i = 0; i < table->n_rows; i++) {
-		teal_print_row_at_addr (table, row_ptr);
+		n_chars = teal_fprint_row (table, row_ptr, stdout);
+		printf("row: %zu had %d chars\n", i + 1, n_chars);
+		n_chars = 0;
 		row_ptr += table->n_bytes_row;
 	}
 	return;
@@ -617,24 +628,31 @@ teal_get_row_addr (teal_tabR table, size_t ind) {
 	return (char *) table->bytes + ((ind) * table->n_bytes_row);
 }
 
-void 
-teal_print_row_at_addr (teal_tabR table, void *addr) {
+int 
+teal_fprint_row (teal_tabR table, void *addr, FILE* stream) {
 
 	char *ptr = addr;
-	printf ("%zu\t",  *(size_t *) ptr); // print ROW_ID
+	int n_chars = 0;
+	FILE *output = stdout;
+
+	if (stream) {
+		output = stream;
+	}
+
+	n_chars += fprintf (output, "%zu\t",  *(size_t *) ptr); // print ROW_ID
 	ptr += TYPE_SIZES_BYTES[ _ROW_ID ];
 
 	for ( size_t i = 0; i < table->n_cols; i++ ) {
 
-		( *printing_fns[ table->schema[i] ])((char *) ptr + table->field_offsets[i] );
+		n_chars += ( *fprint_fns[ table->schema[i] ])(output, (char *) ptr + table->field_offsets[i] );
 
 		if (i < table->n_cols - 1) {
-			printf(", ");
+			n_chars += fprintf (output, ", ");
 		} else {
-			printf("\n");
+			n_chars += fprintf (output, "\n");
 		}
 	}
-	return;
+	return n_chars;
 }
 
 teal_tabR

@@ -1,7 +1,7 @@
 #ifndef TEAL_DB_H
 #define TEAL_DB_H
 
-#include <stdint.h>
+//#include <stdint.h>
 #include <inttypes.h>
 #include <stdlib.h>
 #include <uuid/uuid.h>
@@ -9,7 +9,7 @@
 #include <errno.h>
 #include <limits.h>
 #include <locale.h>
-#include <math.h>
+//#include <math.h>
 #include <ctype.h>
 #include <stddef.h>
 //#include <stdarg.h>
@@ -49,8 +49,8 @@ teal_print_table (struct Teal_Table *tableR);
 void *
 teal_get_row_addr (struct Teal_Table *tableR, size_t ind);
 
-void
-teal_print_row_at_addr (struct Teal_Table *tableR, void *addr);
+int 
+teal_fprint_row (struct Teal_Table *tableR, void *addr, FILE* stream);
 
 struct Teal_Table * 
 teal_new_table (char* label, char* schema, size_t n_cols, size_t primary_index);

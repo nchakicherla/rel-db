@@ -26,11 +26,14 @@ int main (void) {
 		printf ("csv read!\n");
 
 		struct Teal_Table *csv_table = teal_new_table ("CSV Table", NULL, csv->n_cols, NO_PRIMARY_KEY);
-		for (size_t k = 0; k < 1; k++) {
+
+		for (size_t k = 0; k < 0; k++) {
+
 			printf("k: %zu\n", k);
+
 			for (size_t i = 0; i < csv->n_rows; i++) { // load each csv row into table
 				teal_table_insert_row (csv_table, csv->rows[i]);
-				//teal_print_row_at_addr (csv_table, teal_get_row_addr (csv_table, i));
+				//teal_fprint_row (csv_table, teal_get_row_addr (csv_table, i));
 			}
 		}
 		teal_debug_print_table_info (csv_table);
@@ -81,7 +84,7 @@ char *TABLE_TEST_COLUMN_LABELS[] =
 
 		printf ("printing...\n");
 		for (size_t i = 0; i < BIGNUM; i++) {
-			teal_print_row_at_addr (table, teal_get_row_addr (table, i) );
+			teal_fprint_row (table, teal_get_row_addr (table, i) );
 		}
 
 		teal_table_free (&table);
