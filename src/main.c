@@ -30,7 +30,7 @@ int main (void) {
 
 	teal_set_calloc_impl (calloc);
 	teal_set_free_impl (free);
-
+/*
 	teal_tabR table = teal_new_table ("My Table", NO_PRIMARY_KEY, "STR ITR32 ITR64 FLT BLN DATE CURR CH");
 	
 	if (table) {
@@ -54,29 +54,29 @@ int main (void) {
 
 		printf ("printing...\n");
 		for (size_t i = 0; i < BIGNUM; i++) {
-			teal_print_row (table, teal_get_row_addr (table, i) );
+			teal_print_row_at_addr (table, teal_get_row_addr (table, i) );
 		}
 
 		teal_table_free (&table);
 	}
-
+*/
 	printf ("reading csv...\n");
-	teal_csvR csv = teal_new_csv ("./resources/reactions.csv");
+	teal_csvR csv = teal_new_csv ("./resources/kaggle/animal_crossing/rugs.csv");
 	printf ("csv read!\n");
 
 	if (csv) {
 
-		char *assembled_schema = teal_new_str_repeat ("STR", csv->n_cols, " ");
+		//char *assembled_schema = teal_new_str_repeat ("STR", csv->n_cols, " ");
 
-		teal_tabR csv_table = teal_new_table ("CSV Table", NO_PRIMARY_KEY, assembled_schema);
-		__teal_free(assembled_schema);
+		teal_tabR csv_table = teal_new_table ("CSV Table", NULL, NO_PRIMARY_KEY, csv->n_cols);
+		//__teal_free(assembled_schema);
 
 		for (size_t i = 0; i < csv->n_rows; i++) {
 			teal_table_insert_row (csv_table, csv->rows[i]);
-			teal_print_row (csv_table, teal_get_row_addr (csv_table, i));
+			teal_print_row_at_addr (csv_table, teal_get_row_addr (csv_table, i));
 		}
 
-		printf("n_cols: %zu\n", csv->n_cols);
+
 		teal_table_free (&csv_table);
 	}
 

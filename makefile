@@ -17,16 +17,16 @@ OBJS = 	./obj/teal_memory.o \
 
 run-default: link
 ifeq ($(OS),Darwin) 
-		./bin/teal_main.run
+		./bin/main.run
 else 
-		valgrind --track-origins=yes --leak-check=full ./bin/teal_main.run  
+		valgrind --track-origins=yes --leak-check=full ./bin/main.run  
 endif
 
 run: link
-	./bin/teal_main.run
+	./bin/main.run
 
 link: $(OBJS) $(MAIN)
-	$(CC) $(CFLAGS) $(OBJS) $(MAIN) -o ./bin/teal_main.run
+	$(CC) $(CFLAGS) $(OBJS) $(MAIN) -o ./bin/main.run
 
 ./obj/%.o: ./src/%.c ./src/%.h ./src/teal_common.h
 	$(CC) $(CFLAGS) -c $< -o $@

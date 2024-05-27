@@ -36,7 +36,7 @@ void
 teal_free_message (teal_msgR *teal_msgRR) {
 
 	__teal_free ((*teal_msgRR)->msg);
-	__teal_free ((*teal_msgRR)->fn);
+	__teal_free ((*teal_msgRR)->fn); 
 	__teal_free (*teal_msgRR);
 	*teal_msgRR = NULL;
 	return;

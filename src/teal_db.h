@@ -77,10 +77,10 @@ void *
 teal_get_row_addr (teal_tabR table, size_t ind);
 
 void
-teal_print_row (teal_tabR table, void *addr);
+teal_print_row_at_addr (teal_tabR table, void *addr);
 
 teal_tabR
-teal_new_table (char* label, size_t primary_index, char* schema);
+teal_new_table (char* label, char* schema, size_t primary_index, size_t n_cols);
 
 void
 teal_table_free (teal_tabR *teal_tabRR);

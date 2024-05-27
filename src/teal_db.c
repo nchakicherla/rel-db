@@ -219,7 +219,7 @@ teal_get_row_addr (teal_tabR table, size_t ind) {
 }
 
 void 
-teal_print_row (teal_tabR table, void *addr) {
+teal_print_row_at_addr (teal_tabR table, void *addr) {
 
 	char *ptr = addr;
 	printf ("%zu\t",  *(size_t *) ptr);
@@ -611,7 +611,7 @@ teal_set_write_field_fnptrs (void) {
 }
 
 teal_tabR
-teal_new_table (char* label, size_t primary_index, char* schema) {
+teal_new_table (char* label, char* schema, size_t primary_index, size_t n_cols) {
 
 	if (false == input_valid_ptrs_set) {
 		teal_set_validate_input_fnptrs ();
@@ -631,7 +631,13 @@ teal_new_table (char* label, size_t primary_index, char* schema) {
 	table->uuid = __teal_calloc (UUID_STR_LEN + 1, sizeof(char));
 	uuid_unparse_upper (bin_uuid, table->uuid);
 
-	char **schema_inputs = teal_new_arr_from_str (schema, " ", &(table->n_cols));
+	char **schema_inputs = NULL;
+
+	if (schema != NULL) {
+		schema_inputs = teal_new_arr_from_str (schema, " ", &(table->n_cols));
+	} else {
+		table->n_cols = n_cols;
+	}
 	
 	table->col_labels = __teal_calloc (table->n_cols, sizeof(char *));
 	table->schema = __teal_calloc (table->n_cols, sizeof(TABLE_FIELD_TYPE));
@@ -639,17 +645,22 @@ teal_new_table (char* label, size_t primary_index, char* schema) {
 
 	for (size_t i = 0; i < table->n_cols; i++) {
 
-		size_t type_index = teal_scan_arr_for_str ( TYPE_NAME_LITERALS,
-												schema_inputs[i]);
+		size_t type_index = STR;
 
+		if (schema) {
+			type_index = teal_scan_arr_for_str ( TYPE_NAME_LITERALS, schema_inputs[i]);
+		}
 		if ( type_index == ARR_INDEX_OOB ) {
 			goto cancel;
 		}
+
 		table->field_offsets[i] = table->n_bytes_row;
 		table->schema[i] = type_index;
 		table->n_bytes_row += TYPE_SIZES_BYTES[ type_index ];
 	}
-	teal_free_str_arr (schema_inputs);
+	if (schema_inputs) {
+		teal_free_str_arr (schema_inputs);
+	}
 
 	table->n_bytes_schema = table->n_bytes_row;
 	table->n_bytes_row += TYPE_SIZES_BYTES[ _ROW_ID ]; // add space for _ROW_ID
