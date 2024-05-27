@@ -37,6 +37,9 @@ teal_new_str_repeat (char *str, size_t n, char *delim);
 char **
 teal_new_arr_from_str (char *str, char *delim, size_t *count);
 
+char **
+teal_new_arr_from_str_safety (char *str, char *delim, char *safety, size_t *count);
+
 void
 teal_free_str_arr (char **split_str);
 

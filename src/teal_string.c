@@ -14,7 +14,7 @@ char *
 teal_str_dup (char* str) {
 
 	size_t len = teal_str_len (str);
-	char *new_str = __teal_calloc (len + 1, sizeof(char));
+	char *new_str = impl_calloc (len + 1, sizeof(char));
 
 	for (size_t i = 0; i < len; i++) {
 		new_str[i] = str[i];
@@ -78,10 +78,10 @@ char *
 teal_new_str_from_stdin (void) {
 
 	const size_t buff_len = 256;
-	char *input = __teal_calloc (buff_len, 1);
+	char *input = impl_calloc (buff_len, 1);
 	char *end = NULL;
 
-	while (!(end = teal_str_chr (input, '\n', buff_len))) {
+	while (NULL == (end = teal_str_chr (input, '\n', buff_len))) {
 		input = fgets (input, buff_len, stdin);
 	}
 	*end = '\0';
@@ -96,7 +96,7 @@ teal_new_str_repeat (char *str, size_t n, char *delim) {
 	size_t delim_len = teal_str_len (delim);
 	size_t total_len = ((str_len + delim_len) * (n - 1)) + str_len;
 
-	char *ret = __teal_calloc (total_len + 1, sizeof(char));
+	char *ret = impl_calloc (total_len + 1, sizeof(char));
 
 	size_t i;
 	size_t j;
@@ -133,7 +133,8 @@ teal_new_arr_from_str (char *str, char *delim, size_t *count) {
 			i += delim_len - 1;
 		}
 	}
-	char **output = __teal_calloc ((*count) + 1, sizeof(char *));
+
+	char **output = impl_calloc ((*count) + 1, sizeof(char *));
 	output[*count] = NULL;
 
 	char* start = str;
@@ -144,7 +145,57 @@ teal_new_arr_from_str (char *str, char *delim, size_t *count) {
 			end++;
 		}
 		size_t tok_len = (size_t)(end - start);
-		output[i] = __teal_calloc (tok_len + 1, sizeof(char));
+		output[i] = impl_calloc (tok_len + 1, sizeof(char));
+		for (size_t j = 0; j < tok_len; j++) {
+			output[i][j] = *start;
+			start++;
+		}
+		output[i][tok_len] = '\0';
+		start = end + delim_len;
+		end = start;
+	}
+
+	return output;
+}
+
+char **
+teal_new_arr_from_str_safety (char *str, char *delim, char *safety, size_t *count) {
+
+	size_t len = teal_str_len (str);
+	size_t delim_len = teal_str_len (delim);
+	size_t safety_len = teal_str_len (safety);
+	bool in_safety = false;
+
+	*count = 1;
+
+	for (size_t i = 0; i < len && *count < ARR_INDEX_OOB; i++) {
+		if (teal_is_substr_at_addr (&str[i], safety)) {
+			if (in_safety == false) {
+				in_safety = true;
+				i += safety_len - 1;
+			}  else {
+				in_safety = false;
+				i += safety_len - 1;
+			}
+		}
+		if (teal_is_substr_at_addr (&str[i], delim) && !in_safety) {
+			(*count)++;
+			i += delim_len - 1;
+		}
+	}
+
+	char **output = impl_calloc ((*count) + 1, sizeof(char *));
+	output[*count] = NULL;
+
+	char* start = str;
+	char* end = str;
+
+	for (size_t i = 0; i < *count; i++) {
+		while (!teal_is_substr_at_addr (end, delim) && *end != '\0') {
+			end++;
+		}
+		size_t tok_len = (size_t)(end - start);
+		output[i] = impl_calloc (tok_len + 1, sizeof(char));
 		for (size_t j = 0; j < tok_len; j++) {
 			output[i][j] = *start;
 			start++;

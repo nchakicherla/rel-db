@@ -16,26 +16,38 @@
 
 int main (void) {
 
-	teal_set_calloc_impl (calloc);
-	teal_set_free_impl (free);
+	//teal_set_calloc_impl (calloc);
+	//teal_set_free_impl (free);
 
 	printf ("reading csv...\n");
-	teal_csvR csv = teal_new_csv ("./resources/animal_crossing/rugs.csv");
-	printf ("csv read!\n");
+	teal_csvR csv = teal_new_csv ("./resources/kaggle/netflix_titles.csv");
 
 	if (csv) {
+		printf ("csv read!\n");
 
-		teal_tabR csv_table = teal_new_table ("CSV Table", NULL, csv->n_cols, NO_PRIMARY_KEY);
+		struct Teal_Table *csv_table = teal_new_table ("CSV Table", NULL, csv->n_cols, NO_PRIMARY_KEY);
 
 		for (size_t i = 0; i < csv->n_rows; i++) { // load each csv row into table
 			teal_table_insert_row (csv_table, csv->rows[i]);
-			teal_print_row_at_addr (csv_table, teal_get_row_addr (csv_table, i));
+			//teal_print_row_at_addr (csv_table, teal_get_row_addr (csv_table, i));
 		}
+		for (size_t i = 0; i < csv->n_rows; i++) { // load each csv row into table
+			teal_table_insert_row (csv_table, csv->rows[i]);
+			//teal_print_row_at_addr (csv_table, teal_get_row_addr (csv_table, i));
+		}
+		for (size_t i = 0; i < csv->n_rows; i++) { // load each csv row into table
+			teal_table_insert_row (csv_table, csv->rows[i]);
+			//teal_print_row_at_addr (csv_table, teal_get_row_addr (csv_table, i));
+		}
+
+		teal_debug_print_table_info (csv_table);
+
+		teal_print_table (csv_table);
 		teal_table_free (&csv_table);
+		teal_free_csv (&csv);
+	} else {
+		printf ("couldn't read csv!\n");
 	}
-
-	teal_free_csv (&csv);
-
 	return 0;
 }
 
