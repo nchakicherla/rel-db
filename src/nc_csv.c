@@ -1,4 +1,4 @@
-#include "teal_csv.h"
+#include "nc_csv.h"
 
 teal_csvR 
 teal_new_csv (char* csv) {
@@ -10,8 +10,8 @@ teal_new_csv (char* csv) {
 
 	teal_csvR ret = impl_calloc (1, sizeof(struct Teal_CSV));
 
-	ret->rows = teal_new_arr_from_str (buffer, "\n", &ret->n_rows);	// split csv by newlines
-	ret->labels = teal_new_arr_from_str (ret->rows[0], ",", &ret->n_cols); // split first line by commas
+	ret->rows = teal_new_split_str (buffer, "\n", &ret->n_rows);	// split csv by newlines
+	ret->labels = teal_new_split_str (ret->rows[0], ",", &ret->n_cols); // split first line by commas
 	
 	printf("n_rows in csv: %zu\n", ret->n_rows);
 

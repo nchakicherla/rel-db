@@ -7,13 +7,13 @@ mkObjDir := $(shell mkdir -p obj)
 
 MAIN = 	./obj/main.o
 
-OBJS = 		./obj/teal_memory.o \
-		./obj/teal_error.o \
-		./obj/teal_string.o \
-		./obj/teal_interpreter.o \
-		./obj/teal_file.o \
-		./obj/teal_db.o \
-		./obj/teal_csv.o \
+OBJS = 		./obj/nc_memory.o \
+		./obj/nc_error.o \
+		./obj/nc_string.o \
+		./obj/nc_inter.o \
+		./obj/nc_file.o \
+		./obj/nc_db.o \
+		./obj/nc_csv.o \
 
 run-default: link
 ifeq ($(OS),Darwin) 
@@ -28,14 +28,14 @@ run: link
 link: $(OBJS) $(MAIN)
 	$(CC) $(CFLAGS) $(OBJS) $(MAIN) -o ./bin/main.run
 
-./obj/%.o: ./src/%.c ./src/%.h ./src/teal_common.h
+./obj/%.o: ./src/%.c ./src/%.h ./src/nc_common.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
 ./obj/main.o: ./src/main.c
 	$(CC) $(CFLAGS) -c ./src/main.c -o ./obj/main.o
 
-clean-obj:
+clear-obj:
 	trash-put ./obj/*
 	
-clean: clean-obj
+clear: clear-obj
 	trash-put ./bin/*

@@ -1,4 +1,4 @@
-#include "teal_file.h"
+#include "nc_file.h"
 
 char *
 teal_new_str_from_file (char *name) {

@@ -1,4 +1,4 @@
-#include "teal_memory.h"
+#include "nc_memory.h"
 
 void *
 (*calloc_impl_fn)(size_t, size_t) = calloc;
@@ -38,20 +38,22 @@ impl_free (void *ptr) {
 }
 
 void *
-grow_alloc (void *ptr, size_t new_bytes, size_t old_bytes) {
+impl_grow_alloc (void *ptr, size_t new_bytes, size_t old_bytes) {
 
 	void *ptr_out = impl_calloc (new_bytes, 1);
 	memcpy (ptr_out, ptr, old_bytes);
+	
 	impl_free (ptr);
 
 	return ptr_out;
 }
 
 void *
-shrink_alloc (void *ptr, size_t bytes) {
+impl_shrink_alloc (void *ptr, size_t bytes) {
 
 	void *ptr_out = impl_calloc (bytes, 1);
 	memcpy (ptr_out, ptr, bytes);
+	
 	impl_free (ptr);
 
 	return ptr_out;

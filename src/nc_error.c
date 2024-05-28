@@ -1,4 +1,4 @@
-#include "teal_error.h"
+#include "nc_error.h"
 
 /*
 typedef struct Teal_Message {

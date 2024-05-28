@@ -1,5 +1,5 @@
-#ifndef TEAL_DB_H
-#define TEAL_DB_H
+#ifndef NVC_DB_H
+#define NVC_DB_H
 
 //#include <stdint.h>
 #include <inttypes.h>
@@ -15,9 +15,9 @@
 //#include <stdarg.h>
 //int write_field_CURR (char *value, void *start_addr);
 
-#include "teal_memory.h"
-#include "teal_string.h"
-#include "teal_csv.h"
+#include "nc_memory.h"
+#include "nc_string.h"
+#include "nc_csv.h"
 // table->n_cols can't exceed SIZE_MAX - 1
 //
 #define NO_PRIMARY_KEY SIZE_MAX
@@ -67,4 +67,4 @@ teal_table_insert_row (struct Teal_Table *tableR, char *row);
 void
 teal_debug_print_table_info (struct Teal_Table *tableR);
 
-#endif // TEAL_DB_H
+#endif // NVC_DB_H

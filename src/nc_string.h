@@ -1,12 +1,12 @@
-#ifndef TEAL_STRING_H
-#define TEAL_STRING_H
+#ifndef NVC_STRING_H
+#define NVC_STRING_H
 
 #include <stddef.h>
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "teal_memory.h"
+#include "nc_memory.h"
 
 #define ARR_INDEX_OOB		SIZE_MAX
 
@@ -35,12 +35,12 @@ char *
 teal_new_str_repeat (char *str, size_t n, char *delim);
 
 char **
-teal_new_arr_from_str (char *str, char *delim, size_t *count);
+teal_new_split_str (char *str, char *delim, size_t *count);
 
 char **
-teal_new_arr_from_str_safety (char *str, char *delim, char *safety, size_t *count);
+teal_new_split_str_safety (char *str, char *delim, char *safety, size_t *count);
 
 void
 teal_free_str_arr (char **split_str);
 
-#endif // TEAL_STRING_H
+#endif // NVC_STRING_H

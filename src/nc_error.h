@@ -1,12 +1,12 @@
-#ifndef TEAL_ERROR_H
-#define TEAL_ERROR_H
+#ifndef NVC_ERROR_H
+#define NVC_ERROR_H
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
 
-#include "teal_memory.h"
-#include "teal_string.h"
+#include "nc_memory.h"
+#include "nc_string.h"
 
 typedef struct Teal_Maybe {
 	void* data;
@@ -31,4 +31,4 @@ teal_free_maybe (teal_maybe *teal_maybeRR);
 void
 teal_free_message (teal_msgR *teal_msgRR);
 
-#endif // TEAL_ERROR_H
+#endif // NVC_ERROR_H

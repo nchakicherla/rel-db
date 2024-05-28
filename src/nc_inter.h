@@ -1,11 +1,11 @@
-#ifndef TEAL_INTERPRETER_H
-#define TEAL_INTERPRETER_H
+#ifndef NVC_INTERPRETER_H
+#define NVC_INTERPRETER_H
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
 
-#include "teal_string.h"
+#include "nc_string.h"
 
 typedef enum
 {
@@ -23,4 +23,4 @@ typedef struct teal_Token {
 teal_tokR
 teal_new_tok (FELT_TOK_TYPE type, void *data);
 
-#endif // TEAL_INTERPRETER_H
+#endif // NVC_INTERPRETER_H

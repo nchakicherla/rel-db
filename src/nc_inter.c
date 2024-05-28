@@ -1,4 +1,4 @@
-#include "teal_interpreter.h"
+#include "nc_inter.h"
 
 /*
 typedef enum

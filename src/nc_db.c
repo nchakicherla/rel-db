@@ -1,6 +1,6 @@
-#include "teal_db.h"
+#include "nc_db.h"
 
-#define NUM_TYPES_IMPL 8
+#define NUM_TYPES 8
 
 
 #define DEF_BYTES_LEN  512
@@ -16,7 +16,8 @@ bool input_valid_ptrs_set = false;
 bool write_field_ptrs_set = false;
 bool print_field_ptrs_set = false;
 
-typedef enum {
+typedef enum 
+{
 	_ROW_ID = 0,
 	STR,
 	ITR32,
@@ -61,7 +62,8 @@ const size_t TYPE_SIZES_BYTES[] =
 	sizeof(teal_ref)
 };
 
-typedef struct Teal_Table {
+typedef struct Teal_Table 
+{
 	char *label;
 	char *uuid;
 
@@ -83,7 +85,8 @@ typedef struct Teal_Table {
 
 } *teal_tabR;
 
-typedef struct Mara_Double { // taken from my mara library
+typedef struct Mara_Double 
+{ // taken from my mara library
 	double val;
 	int frac_digs;
 } *mara_fltR;
@@ -159,7 +162,7 @@ mara_new_parsed_float (char *str) { // taken from my mara library
     return parsed_flt;
 }
 
-int  
+int 
 fprint_field_STR (FILE* stream, void *addr) {
 
 	//char *str_cast = *(char **) addr;
@@ -171,7 +174,7 @@ fprint_field_STR (FILE* stream, void *addr) {
 	//return;
 }
 
-int  
+int 
 fprint_field_ITR32 (FILE* stream, void *addr) {
 
 	return (fprintf (stream, "%" PRId32 "", *(int32_t *) addr));
@@ -180,21 +183,19 @@ fprint_field_ITR32 (FILE* stream, void *addr) {
 int 
 fprint_field_ITR64 (FILE* stream, void *addr) {
 
-	;
 	return (fprintf (stream, "%" PRId64 "", *(int64_t *) addr));
 }
 
-int  
+int 
 fprint_field_DBL (FILE* stream, void *addr) {
 
 	double val = *(double *) addr;
 	int frac_digs = *(int *)((char *) addr + sizeof(double));
 
-	;
 	return (fprintf (stream, "%.*f", frac_digs, val));
 }
 
-int  
+int 
 fprint_field_BLN (FILE* stream, void *addr) {
 
 	if (true == *(bool *) addr) {
@@ -202,24 +203,20 @@ fprint_field_BLN (FILE* stream, void *addr) {
 	} else {
 		return (fprintf (stream, "FALSE"));
 	}
-	//return;
 }
 
-int  
+int 
 fprint_field_DATE (FILE* stream, void *addr) {
 
 	char* ptr = (char *) addr;
 	int ret = 0;
-	// month
-	ret += fprintf (stream, "%" PRIu8 "/", *(uint8_t *)(ptr + sizeof(uint16_t)));
-	// day
-	ret += fprintf (stream, "%" PRIu8 "/", *(uint8_t *)(ptr + sizeof(uint16_t) + sizeof(uint8_t)));
-	// year
-	ret += fprintf (stream, "%" PRIu16 "", *(uint16_t *) ptr);
+	ret += fprintf (stream, "%" PRIu8 "/", *(uint8_t *)(ptr + sizeof(uint16_t))); // month
+	ret += fprintf (stream, "%" PRIu8 "/", *(uint8_t *)(ptr + sizeof(uint16_t) + sizeof(uint8_t))); // day
+	ret += fprintf (stream, "%" PRIu16 "", *(uint16_t *) ptr); // year
 	return ret;
 }
 
-int  
+int 
 fprint_field_CURR (FILE* stream, void *addr) {
 
 	char *ptr = (char *) addr;
@@ -231,12 +228,11 @@ fprint_field_CURR (FILE* stream, void *addr) {
 	return ret;
 }
 
-int  
+int 
 fprint_field_CH (FILE* stream, void *addr) {
 
-	char *ptr = (char *) addr;
-	;
-	return (fprintf (stream, "%c", *ptr));
+	//char *ptr = (char *) addr;
+	return (fprintf (stream, "%c", *(char *) addr));
 }
 
 bool 
@@ -331,7 +327,7 @@ validate_input_DATE (char *value) {
 
 	errno = 0;
 	size_t count = 0;
-	char **split = teal_new_arr_from_str (value, "-", &count);
+	char **split = teal_new_split_str (value, "-", &count);
 
 	bool ret = false;
 	if (count < 3) {
@@ -367,7 +363,7 @@ validate_input_CURR (char *value) {
 	errno = 0;
 	bool ret = false;
 	size_t count = 0;
-	char **split = teal_new_arr_from_str (value, ".", &count);
+	char **split = teal_new_split_str (value, ".", &count);
 
 	if (count != 2) {
 		goto cleanup;
@@ -495,7 +491,7 @@ int
 write_field_DATE (char *value, void *start_addr) {
 	// fields are written "left to right" year -> month -> day 16 + 8 + 8
 	size_t count = 0;
-	char **split = teal_new_arr_from_str (value, "-", &count);
+	char **split = teal_new_split_str (value, "-", &count);
 
 	uint16_t *uint16_cast = (uint16_t *) start_addr;
 	*uint16_cast = (uint16_t) strtoul (split[2], NULL, 10); // year
@@ -512,7 +508,7 @@ int
 write_field_CURR (char *value, void *start_addr) {
 
 	size_t count = 0;
-	char **split = teal_new_arr_from_str (value, ".", &count);
+	char **split = teal_new_split_str (value, ".", &count);
 
 	int64_t dollar_val = (int64_t) strtoll (split[0], NULL, 10);
 	uint8_t cent_val = (uint8_t) strtoul (split[1], NULL, 10);
@@ -537,13 +533,13 @@ write_field_CH (char *value, void *start_addr) {
 }
 
 int 
-(*fprint_fns [NUM_TYPES_IMPL] ) (FILE* stream, void *addr);
+(*fprint_fns [NUM_TYPES] ) (FILE* stream, void *addr);
 
 bool 
-(*validation_fns [NUM_TYPES_IMPL] ) (char *value);
+(*validation_fns [NUM_TYPES] ) (char *value);
 
 int 
-(*writing_fns [NUM_TYPES_IMPL] ) (char *value, void *start_addr);
+(*writing_fns [NUM_TYPES] ) (char *value, void *start_addr);
 
 void 
 set_print_fns (void) {
@@ -599,7 +595,7 @@ grow_table_bytes (teal_tabR table) {
 	void *new_bytes = NULL;
 	size_t new_size = table->bytes_avail * BYTES_GROW_FACTOR;
 
-	if( NULL == (new_bytes = grow_alloc (table->bytes, new_size, table->bytes_avail)) ) {
+	if( NULL == (new_bytes = impl_grow_alloc (table->bytes, new_size, table->bytes_avail)) ) {
 		return 1;
 	}
 
@@ -679,7 +675,7 @@ teal_new_table (char* label, char* schema, size_t n_cols, size_t primary_index) 
 	char **schema_inputs = NULL;
 
 	if (schema != NULL) {
-		schema_inputs = teal_new_arr_from_str (schema, " ", &(table->n_cols));
+		schema_inputs = teal_new_split_str (schema, " ", &(table->n_cols));
 	} else {
 		table->n_cols = n_cols;
 	}
@@ -773,7 +769,7 @@ teal_table_insert_row (teal_tabR table, char *row) {
 
 	int ret = 0;
 	size_t attr_count = 0;
-	char **split_row = teal_new_arr_from_str_safety (row, ",", "\"", &attr_count);
+	char **split_row = teal_new_split_str_safety (row, ",", "\"", &attr_count);
 
 	if (attr_count != table->n_cols) {
 		ret = 1;

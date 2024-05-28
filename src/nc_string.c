@@ -1,4 +1,4 @@
-#include "teal_string.h"
+#include "nc_string.h"
 
 size_t
 teal_str_len (char* str) {
@@ -121,7 +121,7 @@ teal_new_str_repeat (char *str, size_t n, char *delim) {
 }
 
 char **
-teal_new_arr_from_str (char *str, char *delim, size_t *count) {
+teal_new_split_str (char *str, char *delim, size_t *count) {
 
 	size_t len = teal_str_len (str);
 	size_t delim_len = teal_str_len (delim);
@@ -159,7 +159,7 @@ teal_new_arr_from_str (char *str, char *delim, size_t *count) {
 }
 
 char **
-teal_new_arr_from_str_safety (char *str, char *delim, char *safety, size_t *count) {
+teal_new_split_str_safety (char *str, char *delim, char *safety, size_t *count) {
 
 	size_t len = teal_str_len (str);
 	size_t delim_len = teal_str_len (delim);
