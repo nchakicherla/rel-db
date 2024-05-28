@@ -59,10 +59,10 @@ const size_t TYPE_SIZES_BYTES[] =
 	sizeof(int64_t) + sizeof(uint8_t),
 	sizeof(char),
 	// pending implement
-	sizeof(teal_ref)
+	sizeof(tl_ref)
 };
 
-typedef struct Teal_Table 
+typedef struct TL_Table 
 {
 	char *label;
 	char *uuid;
@@ -78,8 +78,8 @@ typedef struct Teal_Table
 	size_t n_bytes_row;
 	size_t n_cols;
 	size_t n_rows;
-	size_t bytes_avail;
-	size_t bytes_used;
+	size_t n_bytes_allocd;
+	size_t n_bytes_used;
 
 	void *bytes;
 
@@ -94,7 +94,7 @@ typedef struct Mara_Double
 mara_fltR 
 mara_new_parsed_float (char *str) { // taken from my mara library
 
-	size_t len = teal_str_len (str);
+	size_t len = tl_str_len (str);
 
 	for (size_t i = 0; i < len; i++) {
 		if (!isdigit (str[i]) && str[i] != '.' && str[i] != 'e' && str[i] != '-') {
@@ -110,19 +110,19 @@ mara_new_parsed_float (char *str) { // taken from my mara library
 		return NULL;
 	}
 
-	char *e_loc = teal_str_chr (str, 'e', len);
-	char *dec_loc = teal_str_chr (str, '.', len);
+	char *e_loc = tl_str_chr (str, 'e', len);
+	char *dec_loc = tl_str_chr (str, '.', len);
 
     if (dec_loc) {
         if (*(dec_loc + 1) != '\0') { // check for second decimal
-            if (teal_str_chr (dec_loc + 1, '.', len - (size_t)(dec_loc - str + 1))) {
+            if (tl_str_chr (dec_loc + 1, '.', len - (size_t)(dec_loc - str + 1))) {
                 return NULL;
             }
         }
     }
     if (e_loc) {
         if (*(e_loc + 1) != '\0') {
-            if (teal_str_chr (e_loc + 1, 'e', len - (size_t)(e_loc - str + 1))) {
+            if (tl_str_chr (e_loc + 1, 'e', len - (size_t)(e_loc - str + 1))) {
                 return NULL;
             }            
         }
@@ -154,7 +154,7 @@ mara_new_parsed_float (char *str) { // taken from my mara library
         return NULL;
     }
 
-    mara_fltR parsed_flt = impl_calloc (1, sizeof(struct Mara_Double));
+    mara_fltR parsed_flt = tl_impl_calloc (1, sizeof(struct Mara_Double));
 
     parsed_flt->val = val;
     parsed_flt->frac_digs = frac_digs;
@@ -238,7 +238,7 @@ fprint_field_CH (FILE* stream, void *addr) {
 bool 
 validate_input_STR (char* value) {
 
-	if (teal_str_len (value) >= MAX_STR_LEN) {
+	if (tl_str_len (value) >= MAX_STR_LEN) {
 		return false;
 	}
 	return true;
@@ -300,25 +300,25 @@ validate_input_DBL (char *value) {
 		return false;
 	}
 
-	impl_free (parsed_flt);
+	tl_impl_free (parsed_flt);
 	return true;
 }
 
 bool 
 validate_input_BLN (char *value) {
 
-	char *test = teal_str_dup (value);
+	char *test = tl_str_dup (value);
 
 	for (size_t i = 0; test[i] != '\0'; i++) {
 		test[i] = toupper (test[i]);
 	}
 
-	if ( teal_str_same (test, "TRUE") || teal_str_same (test, "FALSE") ) {
-		impl_free (test);
+	if ( tl_str_same (test, "TRUE") || tl_str_same (test, "FALSE") ) {
+		tl_impl_free (test);
 		return true;
 	}
 
-	impl_free (test);
+	tl_impl_free (test);
 	return false;
 }
 
@@ -327,7 +327,7 @@ validate_input_DATE (char *value) {
 
 	errno = 0;
 	size_t count = 0;
-	char **split = teal_new_split_str (value, "-", &count);
+	char **split = tl_new_str_arr (value, "-", &count);
 
 	bool ret = false;
 	if (count < 3) {
@@ -353,7 +353,7 @@ validate_input_DATE (char *value) {
 	ret = true;
 
 cleanup:
-	teal_free_str_arr (split);
+	tl_free_str_arr (split);
 	return ret;
 }
 
@@ -363,7 +363,7 @@ validate_input_CURR (char *value) {
 	errno = 0;
 	bool ret = false;
 	size_t count = 0;
-	char **split = teal_new_split_str (value, ".", &count);
+	char **split = tl_new_str_arr (value, ".", &count);
 
 	if (count != 2) {
 		goto cleanup;
@@ -396,14 +396,14 @@ validate_input_CURR (char *value) {
 	ret = true;
 
 cleanup:
-	teal_free_str_arr (split);
+	tl_free_str_arr (split);
 	return ret;
 }
 
 bool
 validate_input_CH (char* value) {
 
-	if (teal_str_len (value) != 1) {
+	if (tl_str_len (value) != 1) {
 		return false;
 	}
 	return true;
@@ -414,12 +414,12 @@ write_field_STR (char *value, void *start_addr) {
 
 	size_t len;
 
-	if (0 == (len = teal_str_len (value))) {
+	if (0 == (len = tl_str_len (value))) {
 		memset (start_addr, '\0', sizeof(char *));
 		return 0;
 	}
 
-	char* alloc = impl_calloc (len + 1, sizeof(char));
+	char* alloc = tl_impl_calloc (len + 1, sizeof(char));
 
 	for (size_t i = 0; i < len; i++) {
 		alloc[i] = value[i];
@@ -463,27 +463,27 @@ write_field_DBL(char *value, void *start_addr) {
 	int *int_cast = (int *)( (char *) start_addr + sizeof(double) );
 	*int_cast = parsed_flt->frac_digs;
 
-	impl_free(parsed_flt);
+	tl_impl_free(parsed_flt);
 	return 0;
 }
 
 int 
 write_field_BLN(char *value, void *start_addr) {
 
-	char *temp_buffer = teal_str_dup (value);
+	char *temp_buffer = tl_str_dup (value);
 	bool *bool_cast = (bool *) start_addr;
 
 	for (size_t i = 0; temp_buffer[i] != '\0'; i++) {
 		temp_buffer[i] = toupper (temp_buffer[i]);
 	}
 
-	if (teal_str_same (temp_buffer, "TRUE")) {
+	if (tl_str_same (temp_buffer, "TRUE")) {
 		*bool_cast = true;
 	} else {
 		*bool_cast = false;
 	}
 
-	impl_free (temp_buffer);
+	tl_impl_free (temp_buffer);
 	return 0;
 }
 
@@ -491,7 +491,7 @@ int
 write_field_DATE (char *value, void *start_addr) {
 	// fields are written "left to right" year -> month -> day 16 + 8 + 8
 	size_t count = 0;
-	char **split = teal_new_split_str (value, "-", &count);
+	char **split = tl_new_str_arr (value, "-", &count);
 
 	uint16_t *uint16_cast = (uint16_t *) start_addr;
 	*uint16_cast = (uint16_t) strtoul (split[2], NULL, 10); // year
@@ -500,7 +500,7 @@ write_field_DATE (char *value, void *start_addr) {
 	*(uint8_cast + 2) = strtoul (split[0], NULL, 10); // month
 	*(uint8_cast + 3) = strtoul (split[1], NULL, 10); // day
 
-	teal_free_str_arr (split);
+	tl_free_str_arr (split);
 	return 0;
 }
 
@@ -508,12 +508,12 @@ int
 write_field_CURR (char *value, void *start_addr) {
 
 	size_t count = 0;
-	char **split = teal_new_split_str (value, ".", &count);
+	char **split = tl_new_str_arr (value, ".", &count);
 
 	int64_t dollar_val = (int64_t) strtoll (split[0], NULL, 10);
 	uint8_t cent_val = (uint8_t) strtoul (split[1], NULL, 10);
 
-	teal_free_str_arr (split);
+	tl_free_str_arr (split);
 
 	int64_t *int64_cast = (int64_t *) start_addr;
 	*int64_cast = dollar_val;
@@ -542,7 +542,7 @@ int
 (*writing_fns [NUM_TYPES] ) (char *value, void *start_addr);
 
 void 
-set_print_fns (void) {
+set_fprint_fns (void) {
 
 	fprint_fns[STR] = fprint_field_STR;
 	fprint_fns[ITR32] = fprint_field_ITR32;
@@ -593,24 +593,24 @@ int
 grow_table_bytes (teal_tabR table) {
 
 	void *new_bytes = NULL;
-	size_t new_size = table->bytes_avail * BYTES_GROW_FACTOR;
+	size_t new_size = table->n_bytes_allocd * BYTES_GROW_FACTOR;
 
-	if( NULL == (new_bytes = impl_grow_alloc (table->bytes, new_size, table->bytes_avail)) ) {
+	if( NULL == (new_bytes = tl_impl_grow_alloc (table->bytes, new_size, table->n_bytes_allocd)) ) {
 		return 1;
 	}
 
 	table->bytes = new_bytes;
-	table->bytes_avail = new_size;
+	table->n_bytes_allocd = new_size;
 	return 0;
 }
 
 void 
-teal_print_table (teal_tabR table) {
+tl_print_table (teal_tabR table) {
 
 	char *row_ptr = table->bytes;
 	int n_chars = 0;
 	for (size_t i = 0; i < table->n_rows; i++) {
-		n_chars = teal_fprint_row (table, row_ptr, stdout);
+		n_chars = tl_fprint_row (table, row_ptr, stdout);
 		printf("row: %zu had %d chars\n", i + 1, n_chars);
 		n_chars = 0;
 		row_ptr += table->n_bytes_row;
@@ -619,13 +619,13 @@ teal_print_table (teal_tabR table) {
 }
 
 void *
-teal_get_row_addr (teal_tabR table, size_t ind) {
+tl_get_row_addr (teal_tabR table, size_t ind) {
 
 	return (char *) table->bytes + ((ind) * table->n_bytes_row);
 }
 
 int 
-teal_fprint_row (teal_tabR table, void *addr, FILE* stream) {
+tl_fprint_row (teal_tabR table, void *addr, FILE* stream) {
 
 	char *ptr = addr;
 	int n_chars = 0;
@@ -640,7 +640,7 @@ teal_fprint_row (teal_tabR table, void *addr, FILE* stream) {
 
 	for ( size_t i = 0; i < table->n_cols; i++ ) {
 
-		n_chars += ( *fprint_fns[ table->schema[i] ])(output, (char *) ptr + table->field_offsets[i] );
+		n_chars += ( fprint_fns[ table->schema[i] ])(output, (char *) ptr + table->field_offsets[i] );
 
 		if (i < table->n_cols - 1) {
 			n_chars += fprintf (output, ", ");
@@ -652,7 +652,7 @@ teal_fprint_row (teal_tabR table, void *addr, FILE* stream) {
 }
 
 teal_tabR
-teal_new_table (char* label, char* schema, size_t n_cols, size_t primary_index) {
+tl_new_table (char* label, char* schema, size_t n_cols, size_t primary_index) {
 
 	if (!input_valid_ptrs_set) {
 		set_validation_fns ();
@@ -661,35 +661,35 @@ teal_new_table (char* label, char* schema, size_t n_cols, size_t primary_index) 
 		set_write_fns ();
 	}
 	if (!print_field_ptrs_set) {
-		set_print_fns ();
+		set_fprint_fns ();
 	}
 
-	teal_tabR table = impl_calloc (1, sizeof(struct Teal_Table));
-	table->label = teal_str_dup (label);
+	teal_tabR table = tl_impl_calloc (1, sizeof(struct TL_Table));
+	table->label = tl_str_dup (label);
 
 	uuid_t bin_uuid;
 	uuid_generate_random (bin_uuid);
-	table->uuid = impl_calloc (UUID_STR_LEN + 1, sizeof(char));
+	table->uuid = tl_impl_calloc (UUID_STR_LEN + 1, sizeof(char));
 	uuid_unparse_upper (bin_uuid, table->uuid);
 
 	char **schema_inputs = NULL;
 
 	if (schema != NULL) {
-		schema_inputs = teal_new_split_str (schema, " ", &(table->n_cols));
+		schema_inputs = tl_new_str_arr (schema, " ", &(table->n_cols));
 	} else {
 		table->n_cols = n_cols;
 	}
 	
-	table->col_labels = impl_calloc (table->n_cols, sizeof(char *));
-	table->schema = impl_calloc (table->n_cols, sizeof(FIELD_TYPE));
-	table->field_offsets = impl_calloc (table->n_cols, sizeof(size_t));
+	table->col_labels = tl_impl_calloc (table->n_cols, sizeof(char *));
+	table->schema = tl_impl_calloc (table->n_cols, sizeof(FIELD_TYPE));
+	table->field_offsets = tl_impl_calloc (table->n_cols, sizeof(size_t));
 
 	for (size_t i = 0; i < table->n_cols; i++) {
 
 		size_t type_index = STR;
 
 		if (schema) {
-			type_index = teal_scan_arr_for_str ( TYPE_NAME_LITERALS, schema_inputs[i]);
+			type_index = tl_scan_str_arr_for_str ( TYPE_NAME_LITERALS, schema_inputs[i]);
 		}
 		if ( type_index == ARR_INDEX_OOB ) {
 			goto cancel;
@@ -700,7 +700,7 @@ teal_new_table (char* label, char* schema, size_t n_cols, size_t primary_index) 
 		table->n_bytes_row += TYPE_SIZES_BYTES[ type_index ];
 	}
 	if (schema_inputs) {
-		teal_free_str_arr (schema_inputs);
+		tl_free_str_arr (schema_inputs);
 	}
 
 	table->n_bytes_schema = table->n_bytes_row;
@@ -715,17 +715,17 @@ teal_new_table (char* label, char* schema, size_t n_cols, size_t primary_index) 
 	return table;
 
 cancel:
-	teal_free_str_arr (schema_inputs);
-	impl_free (table->label);
-	impl_free (table->uuid);
-	impl_free (table->schema);
-	impl_free (table->col_labels);
-	impl_free (table);
+	tl_free_str_arr (schema_inputs);
+	tl_impl_free (table->label);
+	tl_impl_free (table->uuid);
+	tl_impl_free (table->schema);
+	tl_impl_free (table->col_labels);
+	tl_impl_free (table);
 	return NULL;
 }
 
 void 
-teal_table_free (teal_tabR *teal_tabRR) {
+tl_table_free (teal_tabR *teal_tabRR) {
 	
 	size_t total_offset; // free any STR allocations
 	for (size_t i = 0; i < (*teal_tabRR)->n_rows; i++) {
@@ -734,42 +734,42 @@ teal_table_free (teal_tabR *teal_tabRR) {
 			if ((*teal_tabRR)->schema[j] == STR) {
 				// total_offset = prior row offset + row_id size + prior fields in row offset
 				total_offset = 	(i * (*teal_tabRR)->n_bytes_row) + TYPE_SIZES_BYTES[_ROW_ID] + (*teal_tabRR)->field_offsets[j];
-				impl_free ( *(char**)( (char *)((*teal_tabRR)->bytes) + total_offset));
+				tl_impl_free ( *(char**)( (char *)((*teal_tabRR)->bytes) + total_offset));
 			}
 		}
 	}
-	impl_free ((*teal_tabRR)->label);
-	impl_free ((*teal_tabRR)->uuid);
-	impl_free ((*teal_tabRR)->schema);
-	impl_free ((*teal_tabRR)->field_offsets);
+	tl_impl_free ((*teal_tabRR)->label);
+	tl_impl_free ((*teal_tabRR)->uuid);
+	tl_impl_free ((*teal_tabRR)->schema);
+	tl_impl_free ((*teal_tabRR)->field_offsets);
 	for (size_t i = 0; i < (*teal_tabRR)->n_cols; i++) {
-		impl_free ((*teal_tabRR)->col_labels[i]);
+		tl_impl_free ((*teal_tabRR)->col_labels[i]);
 	}
-	impl_free ((*teal_tabRR)->col_labels);
-	impl_free ((*teal_tabRR)->bytes);
-	impl_free (*teal_tabRR);
+	tl_impl_free ((*teal_tabRR)->col_labels);
+	tl_impl_free ((*teal_tabRR)->bytes);
+	tl_impl_free (*teal_tabRR);
 	*teal_tabRR = NULL;
 	return;
 }
 
 int 
-teal_table_update_labels (teal_tabR table, char **labels) {
+tl_table_update_labels (teal_tabR table, char **labels) {
 
 	for (size_t i = 0; i < table->n_cols; i++) {
 		if (table->col_labels[i]) {
-			impl_free (table->col_labels[i]);
+			tl_impl_free (table->col_labels[i]);
 		}
-		table->col_labels[i] = teal_str_dup (labels[i]);
+		table->col_labels[i] = tl_str_dup (labels[i]);
 	}
 	return 0;
 }
 
 int
-teal_table_insert_row (teal_tabR table, char *row) {
+tl_table_insert_row (teal_tabR table, char *row) {
 
 	int ret = 0;
 	size_t attr_count = 0;
-	char **split_row = teal_new_split_str_safety (row, ",", "\"", &attr_count);
+	char **split_row = tl_new_str_arr_safety (row, ",", "\"", &attr_count);
 
 	if (attr_count != table->n_cols) {
 		ret = 1;
@@ -778,22 +778,22 @@ teal_table_insert_row (teal_tabR table, char *row) {
 
 	for (size_t i = 0; i < attr_count; i++) {
 		bool result = false;
-		if (false == (result = (*validation_fns[ table->schema[i] ])( split_row[i] ))) {
+		if (false == (result = (validation_fns[ table->schema[i] ])( split_row[i] ))) {
 			ret = 2;
 			goto cleanup;
 		}
 	}
 	if (!table->bytes) {
-		table->bytes = impl_calloc (DEF_BYTES_LEN, sizeof(char));
-		table->bytes_avail = DEF_BYTES_LEN;
+		table->bytes = tl_impl_calloc (DEF_BYTES_LEN, sizeof(char));
+		table->n_bytes_allocd = DEF_BYTES_LEN;
 	}
 
-	while (table->bytes_avail - table->bytes_used < table->n_bytes_row) {
+	while (table->n_bytes_allocd - table->n_bytes_used < table->n_bytes_row) {
 		grow_table_bytes (table);
 	}
 
 	char *writer_addr = (char *) table->bytes;
-	writer_addr += table->bytes_used;
+	writer_addr += table->n_bytes_used;
 
 	size_t *size_t_cast = (size_t *) writer_addr;
 	*size_t_cast = table->n_rows + 1; // write _ROW_ID; starts at idx 1 naturally
@@ -803,19 +803,34 @@ teal_table_insert_row (teal_tabR table, char *row) {
 	writer_addr += TYPE_SIZES_BYTES[ _ROW_ID ];
 
 	for (size_t i = 0; i < attr_count; i++) {
-		( *writing_fns[ table->schema[i] ] )( split_row[i], writer_addr );
+		( writing_fns[ table->schema[i] ] )( split_row[i], writer_addr );
 		writer_addr += TYPE_SIZES_BYTES[ table->schema[i] ];
 	}
 
-	table->bytes_used += table->n_bytes_row;
+	table->n_bytes_used += table->n_bytes_row;
 
 cleanup:
-	teal_free_str_arr (split_row);
+	tl_free_str_arr (split_row);
 	return ret;
 }
 
+size_t 
+tl_table_load_from_csv (struct TL_Table *tabR, struct TL_CSV *csvR) {
+
+	size_t csv_nrows = tl_csv_get_row_count (csvR);
+	size_t rows_added = 0;
+
+	for (size_t i = 0; i < csv_nrows; i++) {
+		if (0 == tl_table_insert_row (tabR, tl_csv_get_row_addr (csvR, i))) {
+			rows_added++;
+		}
+	}
+
+	return rows_added;
+}
+
 void
-teal_debug_print_table_info (teal_tabR table) {
+tl_debug_print_table_info (teal_tabR table) {
 
 	printf ("table info....");
 	printf ("label: %s\n", table->label);
@@ -823,7 +838,7 @@ teal_debug_print_table_info (teal_tabR table) {
 	printf ("n_bytes_schema: %zu\n", table->n_bytes_schema);
 	printf ("n_bytes_row: %zu\n", table->n_bytes_row);
 	printf ("ncols: %zu, nrows: %zu\n", table->n_cols, table->n_rows);
-	printf ("bytes_avail: %zu\n", table->bytes_avail);
-	printf ("bytes_used: %zu\n", table->bytes_used);
+	printf ("n_bytes_allocd: %zu\n", table->n_bytes_allocd);
+	printf ("n_bytes_used: %zu\n", table->n_bytes_used);
 	return;
 }

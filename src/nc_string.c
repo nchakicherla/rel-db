@@ -1,7 +1,7 @@
 #include "nc_string.h"
 
 size_t
-teal_str_len (char* str) {
+tl_str_len (char* str) {
 
 	size_t len = 0;
 	for (size_t i = 0; str[i] != '\0'; i++) {
@@ -11,10 +11,10 @@ teal_str_len (char* str) {
 }
 
 char *
-teal_str_dup (char* str) {
+tl_str_dup (char* str) {
 
-	size_t len = teal_str_len (str);
-	char *new_str = impl_calloc (len + 1, sizeof(char));
+	size_t len = tl_str_len (str);
+	char *new_str = tl_impl_calloc (len + 1, sizeof(char));
 
 	for (size_t i = 0; i < len; i++) {
 		new_str[i] = str[i];
@@ -25,7 +25,7 @@ teal_str_dup (char* str) {
 }
 
 char *
-teal_str_chr (char *str, char chr, size_t len) {
+tl_str_chr (char *str, char chr, size_t len) {
 
 	for (size_t i = 0; i < len; i++) {
 		if (str[i] == chr) {
@@ -36,10 +36,10 @@ teal_str_chr (char *str, char chr, size_t len) {
 }
 
 size_t
-teal_scan_arr_for_str (char **arr, char *str) {
+tl_scan_str_arr_for_str (char **arr, char *str) {
 
 	for (size_t i = 0; arr[i] != NULL; i++) {
-		if (teal_str_same (arr[i], str)) {
+		if (tl_str_same (arr[i], str)) {
 
 			return i;
 		}
@@ -48,9 +48,9 @@ teal_scan_arr_for_str (char **arr, char *str) {
 }
 
 bool
-teal_is_substr_at_addr (char* addr, char* substr) {
+tl_is_str_at_addr (char* addr, char* substr) {
 	
-	size_t len = teal_str_len (substr);
+	size_t len = tl_str_len (substr);
 
 	for (size_t i = 0; i < len; i++) {
 		if (substr[i] != addr[i]) {
@@ -61,7 +61,7 @@ teal_is_substr_at_addr (char* addr, char* substr) {
 }
 
 bool
-teal_str_same (char *str, char *cmp) {
+tl_str_same (char *str, char *cmp) {
 
 	if (!str || !cmp)
 		return false;
@@ -75,13 +75,13 @@ teal_str_same (char *str, char *cmp) {
 }
 
 char *
-teal_new_str_from_stdin (void) {
+tl_new_str_f_stdin (void) {
 
 	const size_t buff_len = 256;
-	char *input = impl_calloc (buff_len, 1);
+	char *input = tl_impl_calloc (buff_len, 1);
 	char *end = NULL;
 
-	while (NULL == (end = teal_str_chr (input, '\n', buff_len))) {
+	while (NULL == (end = tl_str_chr (input, '\n', buff_len))) {
 		input = fgets (input, buff_len, stdin);
 	}
 	*end = '\0';
@@ -90,13 +90,13 @@ teal_new_str_from_stdin (void) {
 }
 
 char *
-teal_new_str_repeat (char *str, size_t n, char *delim) {
+tl_new_str_repeat (char *str, size_t n, char *delim) {
 
-	size_t str_len = teal_str_len (str);
-	size_t delim_len = teal_str_len (delim);
+	size_t str_len = tl_str_len (str);
+	size_t delim_len = tl_str_len (delim);
 	size_t total_len = ((str_len + delim_len) * (n - 1)) + str_len;
 
-	char *ret = impl_calloc (total_len + 1, sizeof(char));
+	char *ret = tl_impl_calloc (total_len + 1, sizeof(char));
 
 	size_t i;
 	size_t j;
@@ -121,31 +121,31 @@ teal_new_str_repeat (char *str, size_t n, char *delim) {
 }
 
 char **
-teal_new_split_str (char *str, char *delim, size_t *count) {
+tl_new_str_arr (char *str, char *delim, size_t *count) {
 
-	size_t len = teal_str_len (str);
-	size_t delim_len = teal_str_len (delim);
+	size_t len = tl_str_len (str);
+	size_t delim_len = tl_str_len (delim);
 
 	*count = 1;
 	for (size_t i = 0; i < len && *count < ARR_INDEX_OOB; i++) {
-		if (teal_is_substr_at_addr (&str[i], delim)) {
+		if (tl_is_str_at_addr (&str[i], delim)) {
 			(*count)++;
 			i += delim_len - 1;
 		}
 	}
 
-	char **output = impl_calloc ((*count) + 1, sizeof(char *));
+	char **output = tl_impl_calloc ((*count) + 1, sizeof(char *));
 	output[*count] = NULL;
 
 	char* start = str;
 	char* end = str;
 
 	for (size_t i = 0; i < *count; i++) {
-		while (!teal_is_substr_at_addr (end, delim) && *end != '\0') {
+		while (!tl_is_str_at_addr (end, delim) && *end != '\0') {
 			end++;
 		}
 		size_t tok_len = (size_t)(end - start);
-		output[i] = impl_calloc (tok_len + 1, sizeof(char));
+		output[i] = tl_impl_calloc (tok_len + 1, sizeof(char));
 		for (size_t j = 0; j < tok_len; j++) {
 			output[i][j] = *start;
 			start++;
@@ -159,17 +159,17 @@ teal_new_split_str (char *str, char *delim, size_t *count) {
 }
 
 char **
-teal_new_split_str_safety (char *str, char *delim, char *safety, size_t *count) {
+tl_new_str_arr_safety (char *str, char *delim, char *safety, size_t *count) {
 
-	size_t len = teal_str_len (str);
-	size_t delim_len = teal_str_len (delim);
-	size_t safety_len = teal_str_len (safety);
+	size_t len = tl_str_len (str);
+	size_t delim_len = tl_str_len (delim);
+	size_t safety_len = tl_str_len (safety);
 	bool in_safety = false;
 
 	*count = 1;
 
 	for (size_t i = 0; i < len && *count < ARR_INDEX_OOB; i++) {
-		if (teal_is_substr_at_addr (&str[i], safety)) {
+		if (tl_is_str_at_addr (&str[i], safety)) {
 			if (in_safety == false) {
 				in_safety = true;
 			}  else {
@@ -177,24 +177,24 @@ teal_new_split_str_safety (char *str, char *delim, char *safety, size_t *count) 
 			}
 			i += safety_len - 1;
 		}
-		if (teal_is_substr_at_addr (&str[i], delim) && !in_safety) {
+		if (tl_is_str_at_addr (&str[i], delim) && !in_safety) {
 			(*count)++;
 			i += delim_len - 1;
 		}
 	}
 
-	char **output = impl_calloc ((*count) + 1, sizeof(char *));
+	char **output = tl_impl_calloc ((*count) + 1, sizeof(char *));
 	output[*count] = NULL;
 
 	char* start = str;
 	char* end = str;
 
 	for (size_t i = 0; i < *count; i++) {
-		while (!teal_is_substr_at_addr (end, delim) && *end != '\0') {
+		while (!tl_is_str_at_addr (end, delim) && *end != '\0') {
 			end++;
 		}
 		size_t tok_len = (size_t)(end - start);
-		output[i] = impl_calloc (tok_len + 1, sizeof(char));
+		output[i] = tl_impl_calloc (tok_len + 1, sizeof(char));
 		for (size_t j = 0; j < tok_len; j++) {
 			output[i][j] = *start;
 			start++;
@@ -208,7 +208,7 @@ teal_new_split_str_safety (char *str, char *delim, char *safety, size_t *count) 
 }
 
 void
-teal_free_str_arr (char **split_str) {
+tl_free_str_arr (char **split_str) {
 
 	for (size_t i = 0; split_str[i] != NULL; i++) {
 		free (split_str[i]);

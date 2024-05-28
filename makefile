@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -std=c99 -Wall -Wpedantic -luuid -Werror
+CFLAGS = -std=c99 -Wall -Wpedantic -luuid -Werror -o3
 OS := $(shell uname)
 
 mkBinDir := $(shell mkdir -p bin)
@@ -10,16 +10,16 @@ MAIN = 	./obj/main.o
 OBJS = 		./obj/nc_memory.o \
 		./obj/nc_error.o \
 		./obj/nc_string.o \
-		./obj/nc_inter.o \
+		./obj/nc_repl.o \
 		./obj/nc_file.o \
 		./obj/nc_db.o \
 		./obj/nc_csv.o \
 
 run-default: link
 ifeq ($(OS),Darwin) 
-		./bin/main.run
+	./bin/main.run
 else 
-		valgrind --track-origins=yes --leak-check=full ./bin/main.run  
+	valgrind --track-origins=yes --leak-check=full ./bin/main.run  
 endif
 
 run: link

@@ -13,14 +13,14 @@ typedef enum
 	TOK_DBL,
 	TOK_STR,
 	TOK_OPR,
-} FELT_TOK_TYPE;
+} tl_tok_type;
 
-typedef struct teal_Token {
-	FELT_TOK_TYPE type;
+typedef struct TL_Token {
+	tl_tok_type type;
 	void *data;
-} *teal_tokR;
+} *tl_tokR;
 
-teal_tokR
-teal_new_tok (FELT_TOK_TYPE type, void *data);
+tl_tokR
+tl_new_tok (tl_tok_type type, void *data);
 
 #endif // NVC_INTERPRETER_H

@@ -1,53 +1,53 @@
 #include "nc_error.h"
 
 /*
-typedef struct Teal_Message {
+typedef struct TL_Message {
 	int32_t code;
 	char* msg;
 	char* fn;
-} *teal_msgR;
+} *tl_msgR;
 
-typedef struct Teal_Maybe {
+typedef struct TL_Maybe {
 	int32_t code;
 	void* data;
-} *teal_maybe;
+} *tl_maybe;
 */
 
-teal_msgR
-teal_new_message(int32_t code, char* msg, char* fn) {
+tl_msgR
+tl_new_message (int32_t code, char* msg, char* fn) {
 
-	teal_msgR new_msg = impl_calloc (1, sizeof(struct Teal_Message));
+	tl_msgR new_msg = tl_impl_calloc (1, sizeof(struct TL_Message));
 	new_msg->code = code;
-	new_msg->msg = teal_str_dup (msg);
-	new_msg->fn = teal_str_dup (fn);
+	new_msg->msg = tl_str_dup (msg);
+	new_msg->fn = tl_str_dup (fn);
 	return new_msg;
 }
 
 void
-teal_free_message (teal_msgR *teal_msgRR) {
+tl_free_message (tl_msgR *tl_msgRR) {
 
-	impl_free ((*teal_msgRR)->msg);
-	impl_free ((*teal_msgRR)->fn); 
-	impl_free (*teal_msgRR);
-	*teal_msgRR = NULL;
+	tl_impl_free ((*tl_msgRR)->msg);
+	tl_impl_free ((*tl_msgRR)->fn); 
+	tl_impl_free (*tl_msgRR);
+	*tl_msgRR = NULL;
 	return;
 }
 /*
 void
-teal_free_maybe (teal_maybe *teal_maybeRR) {
+teal_free_maybe (tl_maybe *teal_maybeRR) {
 
 	if ((*teal_maybeRR)->data) {
-		impl_free ((*teal_maybeRR)->data);
+		tl_impl_free ((*teal_maybeRR)->data);
 	}
-	impl_free (*teal_maybeRR);
+	tl_impl_free (*teal_maybeRR);
 	*teal_maybeRR = NULL;
 	return;
 }
 
-teal_maybe
+tl_maybe
 teal_new_maybe (int32_t code, void* data) {
 
-	teal_maybe new_maybe = impl_calloc (1, sizeof(struct Teal_Maybe));
+	tl_maybe new_maybe = tl_impl_calloc (1, sizeof(struct TL_Maybe));
 	new_maybe->code = code;
 	new_maybe->data = data;
 	return new_maybe;

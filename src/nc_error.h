@@ -8,27 +8,27 @@
 #include "nc_memory.h"
 #include "nc_string.h"
 
-typedef struct Teal_Maybe {
+typedef struct TL_Maybe {
 	void* data;
 	int32_t code;
-} teal_maybe;
+} tl_maybe;
 
-typedef struct Teal_Message {
+typedef struct TL_Message {
 	int32_t code;
 	char* msg;
 	char* fn;
-} *teal_msgR;
+} *tl_msgR;
 /*
-teal_maybe
+tl_maybe
 teal_new_maybe (int32_t code, void* data);
 */
-teal_msgR
-teal_new_message (int32_t code, char* msg, char* fn);
+tl_msgR
+tl_new_message (int32_t code, char* msg, char* fn);
 /*
 void
-teal_free_maybe (teal_maybe *teal_maybeRR);
+teal_free_maybe (tl_maybe *teal_maybeRR);
 */
 void
-teal_free_message (teal_msgR *teal_msgRR);
+tl_free_message (tl_msgR *tl_msgRR);
 
 #endif // NVC_ERROR_H

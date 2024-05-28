@@ -1,7 +1,7 @@
 #include "nc_file.h"
 
 char *
-teal_new_str_from_file (char *name) {
+tl_new_str_from_file (char *name) {
 	
 	FILE* file = NULL;
 	char *output = NULL;
@@ -15,7 +15,7 @@ teal_new_str_from_file (char *name) {
 	size = ftell (file);
 	fseek (file, 0, SEEK_SET);
 	
-	output = impl_calloc (size + 1, sizeof(char));
+	output = tl_impl_calloc (size + 1, sizeof(char));
 	fread (output, size, 1, file);
 	output[size] = '\0';
 	

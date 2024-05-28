@@ -7,27 +7,27 @@ void
 (*free_impl_fn)(void *) = free;
 
 void
-teal_set_calloc_impl ( void *(*fn)(size_t, size_t)) {
+tl_set_calloc_impl ( void *(*fn)(size_t, size_t)) {
 
 	calloc_impl_fn = fn;
 	return;
 }
 
 void
-teal_set_free_impl ( void (*fn)(void *ptr)) {
+tl_set_free_impl ( void (*fn)(void *ptr)) {
 
 	free_impl_fn = fn;
 	return;
 }
 
 void *
-impl_calloc (size_t n, size_t size) {
+tl_impl_calloc (size_t n, size_t size) {
 
 	return calloc_impl_fn (n, size);
 }
 
 void
-impl_free (void *ptr) {
+tl_impl_free (void *ptr) {
 /*
 	if (!ptr) {
 		return;
@@ -38,23 +38,23 @@ impl_free (void *ptr) {
 }
 
 void *
-impl_grow_alloc (void *ptr, size_t new_bytes, size_t old_bytes) {
+tl_impl_grow_alloc (void *ptr, size_t n_bytes, size_t n_bytes_old) {
 
-	void *ptr_out = impl_calloc (new_bytes, 1);
-	memcpy (ptr_out, ptr, old_bytes);
+	void *ptr_out = tl_impl_calloc (n_bytes, 1);
+	memcpy (ptr_out, ptr, n_bytes_old);
 	
-	impl_free (ptr);
+	tl_impl_free (ptr);
 
 	return ptr_out;
 }
 
 void *
-impl_shrink_alloc (void *ptr, size_t bytes) {
+tl_impl_shrink_alloc (void *ptr, size_t n_bytes) {
 
-	void *ptr_out = impl_calloc (bytes, 1);
-	memcpy (ptr_out, ptr, bytes);
+	void *ptr_out = tl_impl_calloc (n_bytes, 1);
+	memcpy (ptr_out, ptr, n_bytes);
 	
-	impl_free (ptr);
+	tl_impl_free (ptr);
 
 	return ptr_out;
 }

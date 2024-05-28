@@ -29,42 +29,45 @@ typedef struct Teal_Database {
 	char *label;
 	char *uuid;
 	size_t n_tables;
-	struct Teal_Table *tables;
+	struct TL_Table *tables;
 
 } *teal_dbR;
 */
-struct Teal_Table;
+struct TL_Table;
 
-typedef struct Teal_Reference_Field {
+typedef struct TL_Reference_Field {
 	//char *db_uuid;
 	char *tab_uuid;
 	size_t row;
 	size_t col;
 
-} teal_ref;
+} tl_ref;
 
 void 
-teal_print_table (struct Teal_Table *tableR);
+tl_print_table (struct TL_Table *tableR);
 
 void *
-teal_get_row_addr (struct Teal_Table *tableR, size_t ind);
+tl_get_row_addr (struct TL_Table *tableR, size_t ind);
 
 int 
-teal_fprint_row (struct Teal_Table *tableR, void *addr, FILE* stream);
+tl_fprint_row (struct TL_Table *tableR, void *addr, FILE* stream);
 
-struct Teal_Table * 
-teal_new_table (char* label, char* schema, size_t n_cols, size_t primary_index);
-
-void
-teal_table_free (struct Teal_Table **tableRR);
-
-int
-teal_table_update_labels (struct Teal_Table *tableR, char **labels);
-
-int
-teal_table_insert_row (struct Teal_Table *tableR, char *row);
+struct TL_Table * 
+tl_new_table (char* label, char* schema, size_t n_cols, size_t primary_index);
 
 void
-teal_debug_print_table_info (struct Teal_Table *tableR);
+tl_table_free (struct TL_Table **tableRR);
+
+int
+tl_table_update_labels (struct TL_Table *tableR, char **labels);
+
+int
+tl_table_insert_row (struct TL_Table *tableR, char *row);
+
+size_t 
+tl_table_load_from_csv (struct TL_Table *teal_tabR, struct TL_CSV *csvR);
+
+void
+tl_debug_print_table_info (struct TL_Table *tableR);
 
 #endif // NVC_DB_H

@@ -7,23 +7,22 @@
 #include "nc_file.h"
 #include "nc_memory.h"
 
-typedef struct Teal_CSV {
+struct TL_CSV;
 
-	char *source_file;
-	bool validated;
-	size_t n_rows;
-	size_t n_cols;
-
-	char **labels;
-	char **rows;
-
-} *teal_csvR;
-
-teal_csvR 
-teal_new_csv (char* csv);
+struct TL_CSV *  
+tl_new_csv (char* csv);
 
 int 
-teal_free_csv (teal_csvR *teal_csvRR);
+tl_free_csv (struct TL_CSV  **teal_csvRR);
+
+size_t 
+tl_csv_get_row_count (struct TL_CSV *teal_csvR);
+
+size_t 
+tl_csv_get_col_count (struct TL_CSV *teal_csvR);
+
+char *
+tl_csv_get_row_addr (struct TL_CSV *teal_csvR, size_t ind);
 /*
 void 
 teal_debug_print_csv_info (teal_csvR csv);
