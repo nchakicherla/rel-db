@@ -16,15 +16,15 @@ int
 tl_free_csv (struct TL_CSV  **teal_csvRR);
 
 size_t 
-tl_csv_get_row_count (struct TL_CSV *teal_csvR);
+tl_csv_get_row_count (struct TL_CSV *tl_csvR);
 
 size_t 
-tl_csv_get_col_count (struct TL_CSV *teal_csvR);
+tl_csv_get_col_count (struct TL_CSV *tl_csvR);
 
 char *
-tl_csv_get_row_addr (struct TL_CSV *teal_csvR, size_t ind);
+tl_csv_get_row_addr (struct TL_CSV *tl_csvR, size_t ind);
 /*
 void 
-teal_debug_print_csv_info (teal_csvR csv);
+teal_debug_print_csv_info (tl_csvR csv);
 */
 #endif // NVC_CSV_H

@@ -14,7 +14,7 @@ char *
 tl_new_str_dup (char* str) {
 
 	size_t len = tl_str_len (str);
-	char *new_str = tl_impl_calloc (len + 1, sizeof(char));
+	char *new_str = tl_calloc (len + 1, sizeof(char));
 
 	for (size_t i = 0; i < len; i++) {
 		new_str[i] = str[i];
@@ -87,7 +87,7 @@ char *
 tl_new_str_stdin (void) {
 
 	const size_t buff_len = 256;
-	char *input = tl_impl_calloc (buff_len, 1);
+	char *input = tl_calloc (buff_len, 1);
 	char *end = NULL;
 
 	while (NULL == (end = tl_str_chr (input, '\n', buff_len))) {
@@ -105,7 +105,7 @@ tl_new_str_repeat (char *str, size_t n, char *delim) {
 	size_t delim_len = tl_str_len (delim);
 	size_t total_len = ((str_len + delim_len) * (n - 1)) + str_len;
 
-	char *ret = tl_impl_calloc (total_len + 1, sizeof(char));
+	char *ret = tl_calloc (total_len + 1, sizeof(char));
 
 	size_t i;
 	size_t j;
@@ -143,7 +143,7 @@ tl_new_str_arr (char *str, char *delim, size_t *count) {
 		}
 	}
 
-	char **output = tl_impl_calloc ((*count) + 1, sizeof(char *));
+	char **output = tl_calloc ((*count) + 1, sizeof(char *));
 	output[*count] = NULL;
 
 	char* start = str;
@@ -154,7 +154,7 @@ tl_new_str_arr (char *str, char *delim, size_t *count) {
 			end++;
 		}
 		size_t tok_len = (size_t)(end - start);
-		output[i] = tl_impl_calloc (tok_len + 1, sizeof(char));
+		output[i] = tl_calloc (tok_len + 1, sizeof(char));
 		for (size_t j = 0; j < tok_len; j++) {
 			output[i][j] = *start;
 			start++;
@@ -194,7 +194,7 @@ tl_new_str_arr_safety (char *str, char *delim, char *safety, size_t *count) {
 		}
 	}
 
-	char **output = tl_impl_calloc ((*count) + 1, sizeof(char *));
+	char **output = tl_calloc ((*count) + 1, sizeof(char *));
 	output[*count] = NULL;
 
 	char* start = str;
@@ -205,7 +205,7 @@ tl_new_str_arr_safety (char *str, char *delim, char *safety, size_t *count) {
 			end++;
 		}
 		size_t tok_len = (size_t)(end - start);
-		output[i] = tl_impl_calloc (tok_len + 1, sizeof(char));
+		output[i] = tl_calloc (tok_len + 1, sizeof(char));
 		for (size_t j = 0; j < tok_len; j++) {
 			output[i][j] = *start;
 			start++;
@@ -222,9 +222,9 @@ void
 tl_free_str_arr (char **split_str) {
 
 	for (size_t i = 0; split_str[i] != NULL; i++) {
-		tl_impl_free (split_str[i]);
+		tl_free (split_str[i]);
 	}
-	tl_impl_free (split_str);
+	tl_free (split_str);
 
 	return;
 }

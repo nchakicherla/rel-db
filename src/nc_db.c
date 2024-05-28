@@ -30,6 +30,53 @@ typedef enum
 	// pending implement
 	REF,
 } FIELD_TYPE;
+/*
+typedef struct Teal_Database {
+	
+	char *label;
+	char *uuid;
+	size_t n_tables;
+	struct TL_Table *tables;
+
+} *teal_dbR;
+*/
+typedef struct TL_Reference_Field {
+	//char *db_uuid;
+	char *tab_uuid;
+	size_t row;
+	size_t col;
+
+} tl_ref;
+
+typedef struct TL_Table 
+{
+	char *label;
+	char *uuid;
+
+	FIELD_TYPE *schema;
+	size_t *field_offsets;
+	char **col_labels;
+
+	bool has_primary;
+	size_t primary;
+
+	size_t n_bytes_schema;
+	size_t n_bytes_row;
+	size_t n_cols;
+	size_t n_rows;
+	size_t n_bytes_allocd;
+	size_t n_bytes_used;
+
+	void *data;
+
+} *tl_tabR;
+
+typedef struct Mara_Double 
+{ // taken from my mara library
+	double val;
+	int frac_digs;
+	
+} *mara_fltR;
 
 char *TYPE_NAME_LITERALS[] = 
 {
@@ -61,36 +108,6 @@ const size_t TYPE_SIZES_BYTES[] =
 	// pending implement
 	sizeof(tl_ref)
 };
-
-typedef struct TL_Table 
-{
-	char *label;
-	char *uuid;
-
-	FIELD_TYPE *schema;
-	size_t *field_offsets;
-	char **col_labels;
-
-	bool has_primary;
-	size_t primary;
-
-	size_t n_bytes_schema;
-	size_t n_bytes_row;
-	size_t n_cols;
-	size_t n_rows;
-	size_t n_bytes_allocd;
-	size_t n_bytes_used;
-
-	void *bytes;
-
-} *teal_tabR;
-
-typedef struct Mara_Double 
-{ // taken from my mara library
-	double val;
-	int frac_digs;
-	
-} *mara_fltR;
 
 mara_fltR 
 mara_new_parsed_float (char *str) { // taken from my mara library
@@ -155,7 +172,7 @@ mara_new_parsed_float (char *str) { // taken from my mara library
         return NULL;
     }
 
-    mara_fltR parsed_flt = tl_impl_calloc (1, sizeof(struct Mara_Double));
+    mara_fltR parsed_flt = tl_calloc (1, sizeof(struct Mara_Double));
 
     parsed_flt->val = val;
     parsed_flt->frac_digs = frac_digs;
@@ -301,7 +318,7 @@ validate_input_DBL (char *value) {
 		return false;
 	}
 
-	tl_impl_free (parsed_flt);
+	tl_free (parsed_flt);
 	return true;
 }
 
@@ -315,11 +332,11 @@ validate_input_BLN (char *value) {
 	}
 
 	if ( tl_str_same (test, "TRUE") || tl_str_same (test, "FALSE") ) {
-		tl_impl_free (test);
+		tl_free (test);
 		return true;
 	}
 
-	tl_impl_free (test);
+	tl_free (test);
 	return false;
 }
 
@@ -420,7 +437,7 @@ write_field_STR (char *value, void *start_addr) {
 		return 0;
 	}
 
-	char* alloc = tl_impl_calloc (len + 1, sizeof(char));
+	char* alloc = tl_calloc (len + 1, sizeof(char));
 
 	for (size_t i = 0; i < len; i++) {
 		alloc[i] = value[i];
@@ -454,7 +471,7 @@ write_field_ITR64 (char *value, void *start_addr) {
 }
 
 int 
-write_field_DBL(char *value, void *start_addr) {
+write_field_DBL (char *value, void *start_addr) {
 
 	mara_fltR parsed_flt = mara_new_parsed_float (value);
 
@@ -464,12 +481,12 @@ write_field_DBL(char *value, void *start_addr) {
 	int *int_cast = (int *)( (char *) start_addr + sizeof(double) );
 	*int_cast = parsed_flt->frac_digs;
 
-	tl_impl_free(parsed_flt);
+	tl_free(parsed_flt);
 	return 0;
 }
 
 int 
-write_field_BLN(char *value, void *start_addr) {
+write_field_BLN (char *value, void *start_addr) {
 
 	char *temp_buffer = tl_new_str_dup (value);
 	bool *bool_cast = (bool *) start_addr;
@@ -484,7 +501,7 @@ write_field_BLN(char *value, void *start_addr) {
 		*bool_cast = false;
 	}
 
-	tl_impl_free (temp_buffer);
+	tl_free (temp_buffer);
 	return 0;
 }
 
@@ -591,27 +608,27 @@ set_write_fns (void) {
 }
 
 int
-grow_table_bytes (teal_tabR table) {
+grow_table_bytes (tl_tabR table) {
 
 	void *new_bytes = NULL;
 	size_t new_size = table->n_bytes_allocd * BYTES_GROW_FACTOR;
 
-	if( NULL == (new_bytes = tl_impl_grow_alloc (table->bytes, new_size, table->n_bytes_allocd)) ) {
+	if( NULL == (new_bytes = tl_grow_alloc (table->data, new_size, table->n_bytes_allocd)) ) {
 		return 1;
 	}
 
-	table->bytes = new_bytes;
+	table->data = new_bytes;
 	table->n_bytes_allocd = new_size;
 	return 0;
 }
 
 void 
-tl_print_table (teal_tabR table) {
+tl_print_table (tl_tabR table) {
 
-	char *row_ptr = table->bytes;
+	char *row_ptr = table->data;
 	//int n_chars = 0;
 	for (size_t i = 0; i < table->n_rows; i++) {
-		tl_fprint_row (table, row_ptr, stdout);
+		tl_tab_fprint_row (table, row_ptr, stdout);
 		//printf("row: %zu had %d chars\n", i + 1, n_chars);
 		//n_chars = 0;
 		row_ptr += table->n_bytes_row;
@@ -620,16 +637,16 @@ tl_print_table (teal_tabR table) {
 }
 
 void *
-tl_get_row_addr_by_id (teal_tabR table, size_t id) {
+tl_tab_get_row_addr (tl_tabR table, size_t id) {
 
 	if (id > table->n_rows || table->n_rows == 0) {
 		return NULL;
 	}
-	return (char *) table->bytes + ((id - 1) * table->n_bytes_row);
+	return ((char *) table->data) + ((id - 1) * table->n_bytes_row);
 }
 
 int 
-tl_fprint_row (teal_tabR table, void *addr, FILE* stream) {
+tl_tab_fprint_row (tl_tabR table, void *addr, FILE* stream) {
 
 	char *ptr = addr;
 	int n_chars = 0;
@@ -655,8 +672,8 @@ tl_fprint_row (teal_tabR table, void *addr, FILE* stream) {
 	return n_chars;
 }
 
-teal_tabR
-tl_new_table (char* label, char* schema, size_t n_cols, size_t primary_index) {
+tl_tabR
+tl_tab_new (char* label, char* schema, size_t n_cols, size_t primary_index) {
 
 	if (!input_valid_ptrs_set) {
 		set_validation_fns ();
@@ -668,12 +685,12 @@ tl_new_table (char* label, char* schema, size_t n_cols, size_t primary_index) {
 		set_fprint_fns ();
 	}
 
-	teal_tabR table = tl_impl_calloc (1, sizeof(struct TL_Table));
+	tl_tabR table = tl_calloc (1, sizeof(struct TL_Table));
 	table->label = tl_new_str_dup (label);
 
 	uuid_t bin_uuid;
 	uuid_generate_random (bin_uuid);
-	table->uuid = tl_impl_calloc (UUID_STR_LEN + 1, sizeof(char));
+	table->uuid = tl_calloc (UUID_STR_LEN + 1, sizeof(char));
 	uuid_unparse_upper (bin_uuid, table->uuid);
 
 	char **schema_inputs = NULL;
@@ -684,9 +701,9 @@ tl_new_table (char* label, char* schema, size_t n_cols, size_t primary_index) {
 		table->n_cols = n_cols;
 	}
 	
-	table->col_labels = tl_impl_calloc (table->n_cols, sizeof(char *));
-	table->schema = tl_impl_calloc (table->n_cols, sizeof(FIELD_TYPE));
-	table->field_offsets = tl_impl_calloc (table->n_cols, sizeof(size_t));
+	table->col_labels = tl_calloc (table->n_cols, sizeof(char *));
+	table->schema = tl_calloc (table->n_cols, sizeof(FIELD_TYPE));
+	table->field_offsets = tl_calloc (table->n_cols, sizeof(size_t));
 
 	for (size_t i = 0; i < table->n_cols; i++) {
 
@@ -720,16 +737,16 @@ tl_new_table (char* label, char* schema, size_t n_cols, size_t primary_index) {
 
 cancel:
 	tl_free_str_arr (schema_inputs);
-	tl_impl_free (table->label);
-	tl_impl_free (table->uuid);
-	tl_impl_free (table->schema);
-	tl_impl_free (table->col_labels);
-	tl_impl_free (table);
+	tl_free (table->label);
+	tl_free (table->uuid);
+	tl_free (table->schema);
+	tl_free (table->col_labels);
+	tl_free (table);
 	return NULL;
 }
 
 void 
-tl_table_free (teal_tabR *teal_tabRR) {
+tl_tab_free (tl_tabR *teal_tabRR) {
 	
 	size_t total_offset; // free any STR allocations
 	for (size_t i = 0; i < (*teal_tabRR)->n_rows; i++) {
@@ -738,30 +755,30 @@ tl_table_free (teal_tabR *teal_tabRR) {
 			if ((*teal_tabRR)->schema[j] == STR) {
 				// total_offset = prior row offset + row_id size + prior fields in row offset
 				total_offset = 	(i * (*teal_tabRR)->n_bytes_row) + TYPE_SIZES_BYTES[_ROW_ID] + (*teal_tabRR)->field_offsets[j];
-				tl_impl_free ( *(char**)( (char *)((*teal_tabRR)->bytes) + total_offset));
+				tl_free ( *(char**)( (char *)((*teal_tabRR)->data) + total_offset));
 			}
 		}
 	}
-	tl_impl_free ((*teal_tabRR)->label);
-	tl_impl_free ((*teal_tabRR)->uuid);
-	tl_impl_free ((*teal_tabRR)->schema);
-	tl_impl_free ((*teal_tabRR)->field_offsets);
+	tl_free ((*teal_tabRR)->label);
+	tl_free ((*teal_tabRR)->uuid);
+	tl_free ((*teal_tabRR)->schema);
+	tl_free ((*teal_tabRR)->field_offsets);
 	for (size_t i = 0; i < (*teal_tabRR)->n_cols; i++) {
-		tl_impl_free ((*teal_tabRR)->col_labels[i]);
+		tl_free ((*teal_tabRR)->col_labels[i]);
 	}
-	tl_impl_free ((*teal_tabRR)->col_labels);
-	tl_impl_free ((*teal_tabRR)->bytes);
-	tl_impl_free (*teal_tabRR);
+	tl_free ((*teal_tabRR)->col_labels);
+	tl_free ((*teal_tabRR)->data);
+	tl_free (*teal_tabRR);
 	*teal_tabRR = NULL;
 	return;
 }
 
 int 
-tl_table_set_all_labels (teal_tabR table, char **labels) {
+tl_tab_set_labels (tl_tabR table, char **labels) {
 
 	for (size_t i = 0; i < table->n_cols; i++) {
 		if (table->col_labels[i]) {
-			tl_impl_free (table->col_labels[i]);
+			tl_free (table->col_labels[i]);
 		}
 		table->col_labels[i] = tl_new_str_dup (labels[i]);
 	}
@@ -769,7 +786,7 @@ tl_table_set_all_labels (teal_tabR table, char **labels) {
 }
 
 int
-tl_table_insert_row (teal_tabR table, char *row, bool skip_valid) {
+tl_tab_insert_row (tl_tabR table, char *row, bool skip_valid) {
 
 	int ret = 0;
 	size_t attr_count = 0;
@@ -789,8 +806,8 @@ tl_table_insert_row (teal_tabR table, char *row, bool skip_valid) {
 			}
 		}
 	}
-	if (!table->bytes) {
-		table->bytes = tl_impl_calloc (DEF_BYTES_LEN, sizeof(char));
+	if (!table->data) {
+		table->data = tl_calloc (DEF_BYTES_LEN, sizeof(char));
 		table->n_bytes_allocd = DEF_BYTES_LEN;
 	}
 
@@ -798,7 +815,7 @@ tl_table_insert_row (teal_tabR table, char *row, bool skip_valid) {
 		grow_table_bytes (table);
 	}
 
-	char *writer_addr = (char *) table->bytes;
+	char *writer_addr = (char *) table->data;
 	writer_addr += table->n_bytes_used;
 
 	size_t *size_t_cast = (size_t *) writer_addr;
@@ -821,26 +838,33 @@ cleanup:
 }
 
 size_t 
-tl_table_load_from_csv (struct TL_Table *tabR, struct TL_CSV *csvR) {
+tl_tab_load_from_csv (struct TL_Table *tabR, struct TL_CSV *csvR) {
 
 	size_t csv_nrows = tl_csv_get_row_count (csvR);
 	size_t rows_added = 0;
 
-	for (size_t i = 0; i < csv_nrows; i++) {
-		if (0 == tl_table_insert_row (tabR, tl_csv_get_row_addr (csvR, i), false)) {
+	for (size_t i = 1; i <= csv_nrows; i++) {
+
+		if (0 == tl_tab_insert_row (tabR, tl_csv_get_row_addr (csvR, i), false)) {
 			rows_added++;
 		}
 	}
-
 	return rows_added;
 }
 
 void
-tl_debug_print_table_info (teal_tabR table) {
+tl_tab_print_info (tl_tabR table) {
 
 	printf ("table info....");
 	printf ("label: %s\n", table->label);
 	printf ("uuid: %s\n", table->uuid);
+
+	printf ("schema: [ ");
+	for (size_t i = 0; i < table->n_cols; i++) {
+		printf ("%s ", TYPE_NAME_LITERALS[table->schema[i]]);
+	}
+	printf ("]\n");
+
 	printf ("n_bytes_schema: %zu\n", table->n_bytes_schema);
 	printf ("n_bytes_row: %zu\n", table->n_bytes_row);
 	printf ("ncols: %zu, nrows: %zu\n", table->n_cols, table->n_rows);
