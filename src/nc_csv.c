@@ -13,9 +13,9 @@ typedef struct TL_CSV {
 } *teal_csvR;
 
 teal_csvR 
-tl_new_csv (char* csv) {
+tl_new_csv (char* file_name) {
 
-	char* buffer = tl_new_str_from_file (csv);
+	char* buffer = tl_new_str_from_file (file_name);
 	if (NULL == buffer) {
 		return NULL;
 	}
@@ -37,7 +37,7 @@ tl_new_csv (char* csv) {
 	ret->rows = shifted_rows;
 	ret->n_rows--; // decrement after shifting rows
 
-	ret->source_file = tl_str_dup (csv);
+	ret->source_file = tl_new_str_dup (file_name);
 	ret->validated = false;
 
 	tl_impl_free (buffer);

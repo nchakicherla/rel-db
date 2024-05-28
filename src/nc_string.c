@@ -11,7 +11,7 @@ tl_str_len (char* str) {
 }
 
 char *
-tl_str_dup (char* str) {
+tl_new_str_dup (char* str) {
 
 	size_t len = tl_str_len (str);
 	char *new_str = tl_impl_calloc (len + 1, sizeof(char));
@@ -22,6 +22,15 @@ tl_str_dup (char* str) {
 	new_str[len] = '\0';
 
 	return new_str;
+}
+
+void 
+tl_strn_dup (char* dest, char *str, size_t n) {
+
+	for (size_t i = 0; i < n; i++) {
+		dest[i] = str[i];
+	}
+	return;
 }
 
 char *
@@ -36,7 +45,7 @@ tl_str_chr (char *str, char chr, size_t len) {
 }
 
 size_t
-tl_scan_str_arr_for_str (char **arr, char *str) {
+tl_str_in_arr_at (char **arr, char *str) {
 
 	for (size_t i = 0; arr[i] != NULL; i++) {
 		if (tl_str_same (arr[i], str)) {
@@ -48,12 +57,12 @@ tl_scan_str_arr_for_str (char **arr, char *str) {
 }
 
 bool
-tl_is_str_at_addr (char* addr, char* substr) {
+tl_str_at_addr (char* addr, char* str) {
 	
-	size_t len = tl_str_len (substr);
+	size_t len = tl_str_len (str);
 
 	for (size_t i = 0; i < len; i++) {
-		if (substr[i] != addr[i]) {
+		if (str[i] != addr[i]) {
 			return false;
 		}
 	}
@@ -75,7 +84,7 @@ tl_str_same (char *str, char *cmp) {
 }
 
 char *
-tl_new_str_f_stdin (void) {
+tl_new_str_stdin (void) {
 
 	const size_t buff_len = 256;
 	char *input = tl_impl_calloc (buff_len, 1);
@@ -128,7 +137,7 @@ tl_new_str_arr (char *str, char *delim, size_t *count) {
 
 	*count = 1;
 	for (size_t i = 0; i < len && *count < ARR_INDEX_OOB; i++) {
-		if (tl_is_str_at_addr (&str[i], delim)) {
+		if (tl_str_at_addr (&str[i], delim)) {
 			(*count)++;
 			i += delim_len - 1;
 		}
@@ -141,7 +150,7 @@ tl_new_str_arr (char *str, char *delim, size_t *count) {
 	char* end = str;
 
 	for (size_t i = 0; i < *count; i++) {
-		while (!tl_is_str_at_addr (end, delim) && *end != '\0') {
+		while (!tl_str_at_addr (end, delim) && *end != '\0') {
 			end++;
 		}
 		size_t tok_len = (size_t)(end - start);
@@ -169,15 +178,17 @@ tl_new_str_arr_safety (char *str, char *delim, char *safety, size_t *count) {
 	*count = 1;
 
 	for (size_t i = 0; i < len && *count < ARR_INDEX_OOB; i++) {
-		if (tl_is_str_at_addr (&str[i], safety)) {
-			if (in_safety == false) {
+
+		if (tl_str_at_addr (&str[i], safety)) {
+			if (!in_safety) {
 				in_safety = true;
 			}  else {
 				in_safety = false;
 			}
 			i += safety_len - 1;
 		}
-		if (tl_is_str_at_addr (&str[i], delim) && !in_safety) {
+
+		if (tl_str_at_addr (&str[i], delim) && !in_safety) {
 			(*count)++;
 			i += delim_len - 1;
 		}
@@ -190,7 +201,7 @@ tl_new_str_arr_safety (char *str, char *delim, char *safety, size_t *count) {
 	char* end = str;
 
 	for (size_t i = 0; i < *count; i++) {
-		while (!tl_is_str_at_addr (end, delim) && *end != '\0') {
+		while (!tl_str_at_addr (end, delim) && *end != '\0') {
 			end++;
 		}
 		size_t tok_len = (size_t)(end - start);
@@ -211,9 +222,9 @@ void
 tl_free_str_arr (char **split_str) {
 
 	for (size_t i = 0; split_str[i] != NULL; i++) {
-		free (split_str[i]);
+		tl_impl_free (split_str[i]);
 	}
-	free (split_str);
+	tl_impl_free (split_str);
 
 	return;
 }

@@ -1,39 +1,22 @@
 #include "nc_memory.h"
 
 void *
-(*calloc_impl_fn)(size_t, size_t) = calloc;
+(*tl_impl_calloc)(size_t, size_t) = calloc;
 
 void 
-(*free_impl_fn)(void *) = free;
+(*tl_impl_free)(void *) = free;
 
 void
-tl_set_calloc_impl ( void *(*fn)(size_t, size_t)) {
+tl_set_calloc_impl_fn (void *(*fn)(size_t, size_t)) {
 
-	calloc_impl_fn = fn;
+	tl_impl_calloc = fn;
 	return;
 }
 
 void
-tl_set_free_impl ( void (*fn)(void *ptr)) {
+tl_set_free_impl_fn (void (*fn)(void *ptr)) {
 
-	free_impl_fn = fn;
-	return;
-}
-
-void *
-tl_impl_calloc (size_t n, size_t size) {
-
-	return calloc_impl_fn (n, size);
-}
-
-void
-tl_impl_free (void *ptr) {
-/*
-	if (!ptr) {
-		return;
-	}
-*/
-	free_impl_fn (ptr);
+	tl_impl_free = fn;
 	return;
 }
 

@@ -89,6 +89,7 @@ typedef struct Mara_Double
 { // taken from my mara library
 	double val;
 	int frac_digs;
+	
 } *mara_fltR;
 
 mara_fltR 
@@ -307,7 +308,7 @@ validate_input_DBL (char *value) {
 bool 
 validate_input_BLN (char *value) {
 
-	char *test = tl_str_dup (value);
+	char *test = tl_new_str_dup (value);
 
 	for (size_t i = 0; test[i] != '\0'; i++) {
 		test[i] = toupper (test[i]);
@@ -470,7 +471,7 @@ write_field_DBL(char *value, void *start_addr) {
 int 
 write_field_BLN(char *value, void *start_addr) {
 
-	char *temp_buffer = tl_str_dup (value);
+	char *temp_buffer = tl_new_str_dup (value);
 	bool *bool_cast = (bool *) start_addr;
 
 	for (size_t i = 0; temp_buffer[i] != '\0'; i++) {
@@ -608,20 +609,23 @@ void
 tl_print_table (teal_tabR table) {
 
 	char *row_ptr = table->bytes;
-	int n_chars = 0;
+	//int n_chars = 0;
 	for (size_t i = 0; i < table->n_rows; i++) {
-		n_chars = tl_fprint_row (table, row_ptr, stdout);
-		printf("row: %zu had %d chars\n", i + 1, n_chars);
-		n_chars = 0;
+		tl_fprint_row (table, row_ptr, stdout);
+		//printf("row: %zu had %d chars\n", i + 1, n_chars);
+		//n_chars = 0;
 		row_ptr += table->n_bytes_row;
 	}
 	return;
 }
 
 void *
-tl_get_row_addr (teal_tabR table, size_t ind) {
+tl_get_row_addr_by_id (teal_tabR table, size_t id) {
 
-	return (char *) table->bytes + ((ind) * table->n_bytes_row);
+	if (id > table->n_rows || table->n_rows == 0) {
+		return NULL;
+	}
+	return (char *) table->bytes + ((id - 1) * table->n_bytes_row);
 }
 
 int 
@@ -665,7 +669,7 @@ tl_new_table (char* label, char* schema, size_t n_cols, size_t primary_index) {
 	}
 
 	teal_tabR table = tl_impl_calloc (1, sizeof(struct TL_Table));
-	table->label = tl_str_dup (label);
+	table->label = tl_new_str_dup (label);
 
 	uuid_t bin_uuid;
 	uuid_generate_random (bin_uuid);
@@ -689,7 +693,7 @@ tl_new_table (char* label, char* schema, size_t n_cols, size_t primary_index) {
 		size_t type_index = STR;
 
 		if (schema) {
-			type_index = tl_scan_str_arr_for_str ( TYPE_NAME_LITERALS, schema_inputs[i]);
+			type_index = tl_str_in_arr_at ( TYPE_NAME_LITERALS, schema_inputs[i]);
 		}
 		if ( type_index == ARR_INDEX_OOB ) {
 			goto cancel;
@@ -753,19 +757,19 @@ tl_table_free (teal_tabR *teal_tabRR) {
 }
 
 int 
-tl_table_update_labels (teal_tabR table, char **labels) {
+tl_table_set_all_labels (teal_tabR table, char **labels) {
 
 	for (size_t i = 0; i < table->n_cols; i++) {
 		if (table->col_labels[i]) {
 			tl_impl_free (table->col_labels[i]);
 		}
-		table->col_labels[i] = tl_str_dup (labels[i]);
+		table->col_labels[i] = tl_new_str_dup (labels[i]);
 	}
 	return 0;
 }
 
 int
-tl_table_insert_row (teal_tabR table, char *row) {
+tl_table_insert_row (teal_tabR table, char *row, bool skip_valid) {
 
 	int ret = 0;
 	size_t attr_count = 0;
@@ -776,11 +780,13 @@ tl_table_insert_row (teal_tabR table, char *row) {
 		goto cleanup;
 	}
 
-	for (size_t i = 0; i < attr_count; i++) {
-		bool result = false;
-		if (false == (result = (validation_fns[ table->schema[i] ])( split_row[i] ))) {
-			ret = 2;
-			goto cleanup;
+	if (!skip_valid) {
+		for (size_t i = 0; i < attr_count; i++) {
+			bool result = false;
+			if (false == (result = (validation_fns[ table->schema[i] ])( split_row[i] ))) {
+				ret = 2;
+				goto cleanup;
+			}
 		}
 	}
 	if (!table->bytes) {
@@ -821,7 +827,7 @@ tl_table_load_from_csv (struct TL_Table *tabR, struct TL_CSV *csvR) {
 	size_t rows_added = 0;
 
 	for (size_t i = 0; i < csv_nrows; i++) {
-		if (0 == tl_table_insert_row (tabR, tl_csv_get_row_addr (csvR, i))) {
+		if (0 == tl_table_insert_row (tabR, tl_csv_get_row_addr (csvR, i), false)) {
 			rows_added++;
 		}
 	}

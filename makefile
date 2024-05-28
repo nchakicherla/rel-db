@@ -5,6 +5,8 @@ OS := $(shell uname)
 mkBinDir := $(shell mkdir -p bin)
 mkObjDir := $(shell mkdir -p obj)
 
+EXEC = ./bin/main.run
+
 MAIN = 	./obj/main.o
 
 OBJS = 		./obj/nc_memory.o \
@@ -15,27 +17,31 @@ OBJS = 		./obj/nc_memory.o \
 		./obj/nc_db.o \
 		./obj/nc_csv.o \
 
-run-default: link
+default: reset $(EXEC)
 ifeq ($(OS),Darwin) 
-	./bin/main.run
+	$(EXEC)
 else 
-	valgrind --track-origins=yes --leak-check=full ./bin/main.run  
+	valgrind --track-origins=yes --leak-check=full $(EXEC)  
 endif
 
-run: link
-	./bin/main.run
+reset: clear link
+
+run: reset $(EXEC)
+	$(EXEC)
 
 link: $(OBJS) $(MAIN)
-	$(CC) $(CFLAGS) $(OBJS) $(MAIN) -o ./bin/main.run
+	$(CC) $(CFLAGS) $(OBJS) $(MAIN) -o $(EXEC)
 
 ./obj/%.o: ./src/%.c ./src/%.h ./src/nc_common.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
 ./obj/main.o: ./src/main.c
 	$(CC) $(CFLAGS) -c ./src/main.c -o ./obj/main.o
+	
+clear: clear-bin clear-obj
+
+clear-bin:
+	-rm ./bin/*
 
 clear-obj:
-	trash-put ./obj/*
-	
-clear: clear-obj
-	trash-put ./bin/*
+	-rm ./obj/*

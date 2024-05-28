@@ -14,22 +14,25 @@ size_t
 tl_str_len (char *str);
 
 char *
-tl_str_dup (char *str);
+tl_new_str_dup (char *str);
+
+void 
+tl_strn_dup (char* dest, char *str, size_t n);
 
 char *
 tl_str_chr (char *str, char c, size_t len);
 
 size_t
-tl_scan_str_arr_for_str (char **arr, char *str);
+tl_str_in_arr_at (char **arr, char *str);
 
 bool
-tl_is_str_at_addr (char* addr, char* substr);
+tl_str_at_addr (char* addr, char* str);
 
 bool
 tl_str_same (char *str, char *cmp);
 
 char *
-tl_new_str_f_stdin (void);
+tl_new_str_stdin (void);
 
 char *
 tl_new_str_repeat (char *str, size_t n, char *delim);

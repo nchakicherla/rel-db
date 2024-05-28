@@ -18,7 +18,7 @@ tl_new_str_from_file (char *name) {
 	output = tl_impl_calloc (size + 1, sizeof(char));
 	fread (output, size, 1, file);
 	output[size] = '\0';
-	
+			
 	fclose (file);
 	return output;
 }

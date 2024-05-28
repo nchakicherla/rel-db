@@ -18,16 +18,10 @@ typedef struct TL_Message {
 	char* msg;
 	char* fn;
 } *tl_msgR;
-/*
-tl_maybe
-teal_new_maybe (int32_t code, void* data);
-*/
+
 tl_msgR
 tl_new_message (int32_t code, char* msg, char* fn);
-/*
-void
-teal_free_maybe (tl_maybe *teal_maybeRR);
-*/
+
 void
 tl_free_message (tl_msgR *tl_msgRR);
 

@@ -47,7 +47,7 @@ void
 tl_print_table (struct TL_Table *tableR);
 
 void *
-tl_get_row_addr (struct TL_Table *tableR, size_t ind);
+tl_get_row_addr_by_id (struct TL_Table *tableR, size_t id);
 
 int 
 tl_fprint_row (struct TL_Table *tableR, void *addr, FILE* stream);
@@ -59,10 +59,10 @@ void
 tl_table_free (struct TL_Table **tableRR);
 
 int
-tl_table_update_labels (struct TL_Table *tableR, char **labels);
+tl_table_set_all_labels (struct TL_Table *tableR, char **labels);
 
 int
-tl_table_insert_row (struct TL_Table *tableR, char *row);
+tl_table_insert_row (struct TL_Table *tableR, char *row, bool skip_valid);
 
 size_t 
 tl_table_load_from_csv (struct TL_Table *teal_tabR, struct TL_CSV *csvR);
