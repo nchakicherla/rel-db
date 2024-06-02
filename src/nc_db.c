@@ -40,7 +40,7 @@ typedef struct Teal_Database {
 
 } *teal_dbR;
 */
-typedef struct TL_Reference_Field {
+typedef struct TL_Ref_Field {
 	//char *db_uuid;
 	char *tab_uuid;
 	size_t row;
@@ -64,8 +64,8 @@ typedef struct TL_Table
 	size_t n_bytes_row;
 	size_t n_cols;
 	size_t n_rows;
-	size_t n_bytes_allocd;
-	size_t n_bytes_used;
+	size_t nb_capacity;
+	size_t nb_used;
 
 	void *data;
 
@@ -611,14 +611,14 @@ int
 grow_table_bytes (tl_tabR table) {
 
 	void *new_bytes = NULL;
-	size_t new_size = table->n_bytes_allocd * BYTES_GROW_FACTOR;
+	size_t new_size = table->nb_capacity * BYTES_GROW_FACTOR;
 
-	if( NULL == (new_bytes = tl_grow_alloc (table->data, new_size, table->n_bytes_allocd)) ) {
+	if( NULL == (new_bytes = tl_grow_alloc (table->data, new_size, table->nb_capacity)) ) {
 		return 1;
 	}
 
 	table->data = new_bytes;
-	table->n_bytes_allocd = new_size;
+	table->nb_capacity = new_size;
 	return 0;
 }
 
@@ -808,15 +808,15 @@ tl_tab_insert_row (tl_tabR table, char *row, bool skip_valid) {
 	}
 	if (!table->data) {
 		table->data = tl_calloc (DEF_BYTES_LEN, sizeof(char));
-		table->n_bytes_allocd = DEF_BYTES_LEN;
+		table->nb_capacity = DEF_BYTES_LEN;
 	}
 
-	while (table->n_bytes_allocd - table->n_bytes_used < table->n_bytes_row) {
+	while (table->nb_capacity - table->nb_used < table->n_bytes_row) {
 		grow_table_bytes (table);
 	}
 
 	char *writer_addr = (char *) table->data;
-	writer_addr += table->n_bytes_used;
+	writer_addr += table->nb_used;
 
 	size_t *size_t_cast = (size_t *) writer_addr;
 	*size_t_cast = table->n_rows + 1; // write _ROW_ID; starts at idx 1 naturally
@@ -830,7 +830,7 @@ tl_tab_insert_row (tl_tabR table, char *row, bool skip_valid) {
 		writer_addr += TYPE_SIZES_BYTES[ table->schema[i] ];
 	}
 
-	table->n_bytes_used += table->n_bytes_row;
+	table->nb_used += table->n_bytes_row;
 
 cleanup:
 	tl_free_str_arr (split_row);
@@ -859,16 +859,17 @@ tl_tab_print_info (tl_tabR table) {
 	printf ("label: %s\n", table->label);
 	printf ("uuid: %s\n", table->uuid);
 
-	printf ("schema: [ ");
+	printf ("schema (column label : type) : \n[ ");
 	for (size_t i = 0; i < table->n_cols; i++) {
-		printf ("%s ", TYPE_NAME_LITERALS[table->schema[i]]);
+		printf ("%s : ", table->col_labels[i]);
+		printf ("%s, ", TYPE_NAME_LITERALS[table->schema[i]]);
 	}
 	printf ("]\n");
 
 	printf ("n_bytes_schema: %zu\n", table->n_bytes_schema);
 	printf ("n_bytes_row: %zu\n", table->n_bytes_row);
 	printf ("ncols: %zu, nrows: %zu\n", table->n_cols, table->n_rows);
-	printf ("n_bytes_allocd: %zu\n", table->n_bytes_allocd);
-	printf ("n_bytes_used: %zu\n", table->n_bytes_used);
+	printf ("nb_capacity: %zu\n", table->nb_capacity);
+	printf ("nb_used: %zu\n", table->nb_used);
 	return;
 }

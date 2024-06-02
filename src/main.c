@@ -13,21 +13,32 @@
 #include "nc_db.h"
 #include "nc_csv.h"
 
-char *TABLE_TEST_COLUMN_LABELS[] = 
+char *TEST_LABELS[] = 
 {
-	"test1",
-	"test2",
-	"test3",
-	"test4",
-	"test5",
-	"test6",
-	"test7",
-	"test8",
+	"Name",
+	"Age",
 	NULL
 };
 
 int main (void) {
 
+	struct TL_Table *tab = tl_tab_new ("Table1", "STR ITR32", 2, TL_NO_PRIMARY);
+	tl_tab_set_labels (tab, TEST_LABELS);
+
+	size_t a = 0;
+	while (a < UINT16_MAX) {
+		tl_tab_insert_row (tab, "Naveen,28", false);
+		a++;
+	}
+
+	tl_print_table (tab);
+	tl_tab_print_info (tab);
+	tl_tab_free (&tab);
+
+	return 0;
+}
+
+/* // 5/30/2024
 	//tl_set_calloc_fn (calloc);
 	//tl_set_free_fn (free);
 	struct TL_Table *tableR = tl_tab_new ("My Table", "STR ITR32 ITR64 FLT BLN DATE CURR CH", 8, TL_NO_PRIMARY );
@@ -51,7 +62,6 @@ int main (void) {
 			tl_tab_insert_row (tableR, "test,32,64,7.2,fAlse,3-3-2023,52.43,k", true); // 10 000 000 rows, skipping validity takes 12s vs 17.7s
 		}
 		printf ("rows added!\n");
-
 
 		tl_tab_free (&tableR);
 	}
@@ -78,5 +88,4 @@ int main (void) {
 	} else {
 		printf ("couldn't read csv!\n");
 	}
-	return 0;
-}
+	*/
