@@ -131,53 +131,53 @@ mara_new_parsed_float (char *str) { // taken from my mara library
 	char *e_loc = tl_str_chr (str, 'e', len);
 	char *dec_loc = tl_str_chr (str, '.', len);
 
-    if (dec_loc) {
-        if (*(dec_loc + 1) != '\0') { // check for second decimal
-            if (tl_str_chr (dec_loc + 1, '.', len - (size_t)(dec_loc - str + 1))) {
-                return NULL;
-            }
-        }
-    }
-    if (e_loc) {
-        if (*(e_loc + 1) != '\0') {
-            if (tl_str_chr (e_loc + 1, 'e', len - (size_t)(e_loc - str + 1))) {
-                return NULL;
-            }            
-        }
-    }
+	if (dec_loc) {
+	    if (*(dec_loc + 1) != '\0') { // check for second decimal
+	        if (tl_str_chr (dec_loc + 1, '.', len - (size_t)(dec_loc - str + 1))) {
+	            return NULL;
+	        }
+	    }
+	}
+	if (e_loc) {
+	    if (*(e_loc + 1) != '\0') {
+	        if (tl_str_chr (e_loc + 1, 'e', len - (size_t)(e_loc - str + 1))) {
+	            return NULL;
+	        }            
+	    }
+	}
 
-    if (e_loc && *(e_loc + 1) == '-') {
+	if (e_loc && *(e_loc + 1) == '-') {
 
-        char* it = e_loc;
+	    char* it = e_loc;
 
-        if (dec_loc) {
-            while (*(it - 1) != '.') {
-                it--;
-                frac_digs++;
-            }
-        }
-        frac_digs += (int) strtol (e_loc + 2, NULL, 10);
+	    if (dec_loc) {
+	        while (*(it - 1) != '.') {
+	            it--;
+	            frac_digs++;
+	        }
+	    }
+	    frac_digs += (int) strtol (e_loc + 2, NULL, 10);
 
-    } else if (!e_loc && dec_loc) {
-        frac_digs += (len - (int)(dec_loc - str + 1));
-    }
+	} else if (!e_loc && dec_loc) {
+	    frac_digs += (len - (int)(dec_loc - str + 1));
+	}
 
-    if(frac_digs > MAX_FLT_FRAC_DIGS) {
-        return NULL;
-    }
-    if(e_loc != NULL && (size_t)(e_loc - str) - 1 > MAX_FLT_SIG_FIGS) {
-        return NULL;
-    }
-    if(val > MAX_FLT_VAL) {
-        return NULL;
-    }
+	if(frac_digs > MAX_FLT_FRAC_DIGS) {
+	    return NULL;
+	}
+	if(e_loc != NULL && (size_t)(e_loc - str) - 1 > MAX_FLT_SIG_FIGS) {
+	    return NULL;
+	}
+	if(val > MAX_FLT_VAL) {
+	    return NULL;
+	}
 
-    mara_fltR parsed_flt = tl_calloc (1, sizeof(struct Mara_Double));
+	mara_fltR parsed_flt = tl_calloc (1, sizeof(struct Mara_Double));
 
-    parsed_flt->val = val;
-    parsed_flt->frac_digs = frac_digs;
+	parsed_flt->val = val;
+	parsed_flt->frac_digs = frac_digs;
 
-    return parsed_flt;
+	return parsed_flt;
 }
 
 int 
