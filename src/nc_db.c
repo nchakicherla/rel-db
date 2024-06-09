@@ -71,13 +71,6 @@ typedef struct TL_Table
 
 } *tl_tabR;
 
-typedef struct Mara_Double 
-{ // taken from my mara library
-	double val;
-	int frac_digs;
-	
-} *mara_fltR;
-
 char *TYPE_NAME_LITERALS[] = 
 {
 	"_ROW_ID",
@@ -108,6 +101,13 @@ const size_t TYPE_SIZES_BYTES[] =
 	// pending implement
 	sizeof(tl_ref)
 };
+
+typedef struct Mara_Double 
+{ // taken from my mara library
+	double val;
+	int frac_digs;
+	
+} *mara_fltR;
 
 mara_fltR 
 mara_new_parsed_float (char *str) { // taken from my mara library
@@ -821,15 +821,13 @@ tl_tab_insert_row (tl_tabR table, char *row, bool skip_valid) {
 	size_t *size_t_cast = (size_t *) writer_addr;
 	*size_t_cast = table->n_rows + 1; // write _ROW_ID; starts at idx 1 naturally
 	
-	table->n_rows++;
-
 	writer_addr += TYPE_SIZES_BYTES[ _ROW_ID ];
 
 	for (size_t i = 0; i < attr_count; i++) {
 		( writing_fns[ table->schema[i] ] )( split_row[i], writer_addr );
 		writer_addr += TYPE_SIZES_BYTES[ table->schema[i] ];
 	}
-
+	table->n_rows++;
 	table->nb_used += table->n_bytes_row;
 
 cleanup:

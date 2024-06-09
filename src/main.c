@@ -9,6 +9,7 @@
 #include "nc_string.h"
 #include "nc_repl.h"
 #include "nc_file.h"
+#include "nc_hashmap.h"
 
 #include "nc_db.h"
 #include "nc_csv.h"
@@ -33,7 +34,13 @@ int main (void) {
 
 	tl_print_table (tab);
 	tl_tab_print_info (tab);
+
 	tl_tab_free (&tab);
+
+	printf ("str: %s, hash: %lu\n", "test", djb2hash ("test"));
+	printf ("str: %s, hash: %lu\n", "test2", djb2hash ("test2"));
+	printf ("str: %s, hash: %lu\n", "test3", djb2hash ("test3"));
+	printf ("str: %s, hash: %lu\n", "test4", djb2hash ("test4"));
 
 	return 0;
 }
