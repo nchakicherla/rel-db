@@ -37,10 +37,10 @@ int main (void) {
 
 	tl_tab_free (&tab);
 
-	printf ("str: %s, hash: %lu\n", "test", djb2hash ("test"));
-	printf ("str: %s, hash: %lu\n", "test2", djb2hash ("test2"));
-	printf ("str: %s, hash: %lu\n", "test3", djb2hash ("test3"));
-	printf ("str: %s, hash: %lu\n", "test4", djb2hash ("test4"));
+	printf ("str: %s, hash: %u\n", "test", FNV_1a_hash ("test"));
+	printf ("str: %s, hash: %u\n", "test2", FNV_1a_hash ("test2"));
+	printf ("str: %s, hash: %u\n", "test3", FNV_1a_hash ("test3"));
+	printf ("str: %s, hash: %u\n", "test4", FNV_1a_hash ("test4"));
 
 	return 0;
 }
