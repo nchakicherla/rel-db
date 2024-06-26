@@ -9,7 +9,7 @@ BIN = ./bin/main.run
 
 MAIN = 	./obj/main.o
 
-OBJS = 		./obj/nc_memory.o \
+OBJS = 	./obj/nc_memory.o \
 		./obj/nc_error.o \
 		./obj/nc_string.o \
 		./obj/nc_repl.o \

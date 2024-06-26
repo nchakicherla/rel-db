@@ -688,11 +688,14 @@ tl_tab_new (char* label, char* schema, size_t n_cols, size_t primary_index) {
 	tl_tabR table = tl_calloc (1, sizeof(struct TL_Table));
 	table->label = tl_new_str_dup (label);
 
+/*
 	uuid_t bin_uuid;
 	uuid_generate_random (bin_uuid);
 	table->uuid = tl_calloc (UUID_STR_LEN + 1, sizeof(char));
 	uuid_unparse_upper (bin_uuid, table->uuid);
+*/
 
+	table->uuid = tl_new_str_dup("TEMP_UUID");
 	char **schema_inputs = NULL;
 
 	if (schema != NULL) {
