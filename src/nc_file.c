@@ -1,24 +1,24 @@
 #include "nc_file.h"
 
 char *
-tl_new_str_from_file (char *name) {
+tl_new_str_from_file(char *name) {
 	
 	FILE* file = NULL;
 	char *output = NULL;
 	long size;
 
-	file = fopen (name, "r");
+	file = fopen(name, "r");
 	if (!file)
 		return NULL;
 
-	fseek (file, 0, SEEK_END);
-	size = ftell (file);
-	fseek (file, 0, SEEK_SET);
+	fseek(file, 0, SEEK_END);
+	size = ftell(file);
+	fseek(file, 0, SEEK_SET);
 	
-	output = tl_calloc (size + 1, sizeof(char));
-	fread (output, size, 1, file);
+	output = tl_calloc(size + 1, sizeof(char));
+	fread(output, size, 1, file);
 	output[size] = '\0';
 			
-	fclose (file);
+	fclose(file);
 	return output;
 }

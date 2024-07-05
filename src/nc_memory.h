@@ -11,15 +11,15 @@ extern void
 (*tl_free) (void *ptr);
 
 void 
-tl_set_calloc_fn (void *(fn)(size_t, size_t));
+tl_set_calloc_fn(void *(fn)(size_t, size_t));
 
 void
-tl_set_free_fn (void (fn)(void *ptr));
+tl_set_free_fn(void (fn)(void *ptr));
 
 void *
-tl_grow_alloc (void *ptr, size_t new_size, size_t old_size);
+tl_grow_alloc(void *ptr, size_t new_size, size_t old_size);
 
 void *
-tl_shrink_alloc (void *ptr, size_t bytes);
+tl_shrink_alloc(void *ptr, size_t bytes);
 
 #endif // NVC_MEMORY_H

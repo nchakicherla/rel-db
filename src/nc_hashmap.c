@@ -3,7 +3,7 @@
 #define N_BUCKETS 16
 
 unsigned long
-djb2hash (char *data) {
+djb2hash(char *data) {
 
 	unsigned long hash = 5381;
 	int c;
@@ -15,7 +15,7 @@ djb2hash (char *data) {
 }
 
 uint32_t // https://bpa.st/4P7Q
-FNV_1a_hash (const char* str) {
+FNV_1a_hash(const char* str) {
     uint32_t h = 0x811c9dc5u;
     for (unsigned char *p = (unsigned char *) str; *p != '\0'; p++) {
         h = (h ^ *p) * 0x1000193u;

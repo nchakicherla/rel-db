@@ -21,26 +21,26 @@ char *TEST_LABELS[] =
 	NULL
 };
 
-int main (void) {
+int main(void) {
 
-	struct TL_Table *tab = tl_tab_new ("Table1", "STR ITR32", 2, TL_NO_PRIMARY);
-	tl_tab_set_labels (tab, TEST_LABELS);
+	struct TL_Table *tab = tl_tab_new("Table1", "STR ITR32", 2, TL_NO_PRIMARY);
+	tl_tab_set_labels(tab, TEST_LABELS);
 
 	size_t a = 0;
 	while (a < UINT16_MAX) {
-		tl_tab_insert_row (tab, "Naveen,28", false);
+		tl_tab_insert_row(tab, "Naveen,28", false);
 		a++;
 	}
 
-	tl_print_table (tab);
-	tl_tab_print_info (tab);
+	tl_print_table(tab);
+	tl_tab_print_info(tab);
 
-	tl_tab_free (&tab);
+	tl_tab_free(&tab);
 
-	printf ("str: %s, hash: %u\n", "test", FNV_1a_hash ("test"));
-	printf ("str: %s, hash: %u\n", "test2", FNV_1a_hash ("test2"));
-	printf ("str: %s, hash: %u\n", "test3", FNV_1a_hash ("test3"));
-	printf ("str: %s, hash: %u\n", "test4", FNV_1a_hash ("test4"));
+	printf("str: %s, hash: %u\n", "test", FNV_1a_hash("test"));
+	printf("str: %s, hash: %u\n", "test2", FNV_1a_hash("test2"));
+	printf("str: %s, hash: %u\n", "test3", FNV_1a_hash("test3"));
+	printf("str: %s, hash: %u\n", "test4", FNV_1a_hash("test4"));
 
 	return 0;
 }

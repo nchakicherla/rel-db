@@ -20,9 +20,9 @@ typedef struct TL_Message {
 } *tl_msgR;
 
 tl_msgR
-tl_new_message (int32_t code, char* msg, char* fn);
+tl_new_message(int32_t code, char* msg, char* fn);
 
 void
-tl_free_message (tl_msgR *tl_msgRR);
+tl_free_message(tl_msgR *tl_msgRR);
 
 #endif // NVC_ERROR_H

@@ -1,7 +1,7 @@
 #include "nc_string.h"
 
 size_t
-tl_str_len (char* str) {
+tl_str_len(char* str) {
 
 	size_t len = 0;
 	for (size_t i = 0; str[i] != '\0'; i++) {
@@ -11,10 +11,10 @@ tl_str_len (char* str) {
 }
 
 char *
-tl_new_str_dup (char* str) {
+tl_new_str_dup(char* str) {
 
-	size_t len = tl_str_len (str);
-	char *new_str = tl_calloc (len + 1, sizeof(char));
+	size_t len = tl_str_len(str);
+	char *new_str = tl_calloc(len + 1, sizeof(char));
 
 	for (size_t i = 0; i < len; i++) {
 		new_str[i] = str[i];
@@ -25,7 +25,7 @@ tl_new_str_dup (char* str) {
 }
 
 void 
-tl_strn_dup (char* dest, char *str, size_t n) {
+tl_strn_dup(char* dest, char *str, size_t n) {
 
 	for (size_t i = 0; i < n; i++) {
 		dest[i] = str[i];
@@ -34,7 +34,7 @@ tl_strn_dup (char* dest, char *str, size_t n) {
 }
 
 char *
-tl_str_chr (char *str, char chr, size_t len) {
+tl_str_chr(char *str, char chr, size_t len) {
 
 	for (size_t i = 0; i < len; i++) {
 		if (str[i] == chr) {
@@ -45,10 +45,10 @@ tl_str_chr (char *str, char chr, size_t len) {
 }
 
 size_t
-tl_str_in_arr_at (char **arr, char *str) {
+tl_str_in_arr_at(char **arr, char *str) {
 
 	for (size_t i = 0; arr[i] != NULL; i++) {
-		if (tl_str_same (arr[i], str)) {
+		if (tl_str_same(arr[i], str)) {
 
 			return i;
 		}
@@ -57,9 +57,9 @@ tl_str_in_arr_at (char **arr, char *str) {
 }
 
 bool
-tl_str_at_addr (char* addr, char* str) {
+tl_str_at_addr(char* addr, char* str) {
 	
-	size_t len = tl_str_len (str);
+	size_t len = tl_str_len(str);
 
 	for (size_t i = 0; i < len; i++) {
 		if (str[i] != addr[i]) {
@@ -70,7 +70,7 @@ tl_str_at_addr (char* addr, char* str) {
 }
 
 bool
-tl_str_same (char *str, char *cmp) {
+tl_str_same(char *str, char *cmp) {
 
 	if (!str || !cmp)
 		return false;
@@ -84,14 +84,14 @@ tl_str_same (char *str, char *cmp) {
 }
 
 char *
-tl_new_str_stdin (void) {
+tl_new_str_stdin(void) {
 
 	const size_t buff_len = 256;
-	char *input = tl_calloc (buff_len, 1);
+	char *input = tl_calloc(buff_len, 1);
 	char *end = NULL;
 
-	while (NULL == (end = tl_str_chr (input, '\n', buff_len))) {
-		input = fgets (input, buff_len, stdin);
+	while (NULL == (end = tl_str_chr(input, '\n', buff_len))) {
+		input = fgets(input, buff_len, stdin);
 	}
 	*end = '\0';
 
@@ -99,13 +99,13 @@ tl_new_str_stdin (void) {
 }
 
 char *
-tl_new_str_repeat (char *str, size_t n, char *delim) {
+tl_new_str_repeat(char *str, size_t n, char *delim) {
 
-	size_t str_len = tl_str_len (str);
-	size_t delim_len = tl_str_len (delim);
+	size_t str_len = tl_str_len(str);
+	size_t delim_len = tl_str_len(delim);
 	size_t total_len = ((str_len + delim_len) * (n - 1)) + str_len;
 
-	char *ret = tl_calloc (total_len + 1, sizeof(char));
+	char *ret = tl_calloc(total_len + 1, sizeof(char));
 
 	size_t i;
 	size_t j;
@@ -130,31 +130,31 @@ tl_new_str_repeat (char *str, size_t n, char *delim) {
 }
 
 char **
-tl_new_str_arr (char *str, char *delim, size_t *count) {
+tl_new_str_arr(char *str, char *delim, size_t *count) {
 
-	size_t len = tl_str_len (str);
-	size_t delim_len = tl_str_len (delim);
+	size_t len = tl_str_len(str);
+	size_t delim_len = tl_str_len(delim);
 
 	*count = 1;
 	for (size_t i = 0; i < len && *count < ARR_INDEX_OOB; i++) {
-		if (tl_str_at_addr (&str[i], delim)) {
+		if (tl_str_at_addr(&str[i], delim)) {
 			(*count)++;
 			i += delim_len - 1;
 		}
 	}
 
-	char **output = tl_calloc ((*count) + 1, sizeof(char *));
+	char **output = tl_calloc((*count) + 1, sizeof(char *));
 	output[*count] = NULL;
 
 	char* start = str;
 	char* end = str;
 
 	for (size_t i = 0; i < *count; i++) {
-		while (!tl_str_at_addr (end, delim) && *end != '\0') {
+		while (!tl_str_at_addr(end, delim) && *end != '\0') {
 			end++;
 		}
 		size_t tok_len = (size_t)(end - start);
-		output[i] = tl_calloc (tok_len + 1, sizeof(char));
+		output[i] = tl_calloc(tok_len + 1, sizeof(char));
 		for (size_t j = 0; j < tok_len; j++) {
 			output[i][j] = *start;
 			start++;
@@ -168,18 +168,18 @@ tl_new_str_arr (char *str, char *delim, size_t *count) {
 }
 
 char **
-tl_new_str_arr_safety (char *str, char *delim, char *safety, size_t *count) {
+tl_new_str_arr_safety(char *str, char *delim, char *safety, size_t *count) {
 
-	size_t len = tl_str_len (str);
-	size_t delim_len = tl_str_len (delim);
-	size_t safety_len = tl_str_len (safety);
+	size_t len = tl_str_len(str);
+	size_t delim_len = tl_str_len(delim);
+	size_t safety_len = tl_str_len(safety);
 	bool in_safety = false;
 
 	*count = 1;
 
 	for (size_t i = 0; i < len && *count < ARR_INDEX_OOB; i++) {
 
-		if (tl_str_at_addr (&str[i], safety)) {
+		if (tl_str_at_addr(&str[i], safety)) {
 			if (!in_safety) {
 				in_safety = true;
 			}  else {
@@ -188,24 +188,24 @@ tl_new_str_arr_safety (char *str, char *delim, char *safety, size_t *count) {
 			i += safety_len - 1;
 		}
 
-		if (tl_str_at_addr (&str[i], delim) && !in_safety) {
+		if (tl_str_at_addr(&str[i], delim) && !in_safety) {
 			(*count)++;
 			i += delim_len - 1;
 		}
 	}
 
-	char **output = tl_calloc ((*count) + 1, sizeof(char *));
+	char **output = tl_calloc((*count) + 1, sizeof(char *));
 	output[*count] = NULL;
 
 	char* start = str;
 	char* end = str;
 
 	for (size_t i = 0; i < *count; i++) {
-		while (!tl_str_at_addr (end, delim) && *end != '\0') {
+		while (!tl_str_at_addr(end, delim) && *end != '\0') {
 			end++;
 		}
 		size_t tok_len = (size_t)(end - start);
-		output[i] = tl_calloc (tok_len + 1, sizeof(char));
+		output[i] = tl_calloc(tok_len + 1, sizeof(char));
 		for (size_t j = 0; j < tok_len; j++) {
 			output[i][j] = *start;
 			start++;
@@ -219,12 +219,12 @@ tl_new_str_arr_safety (char *str, char *delim, char *safety, size_t *count) {
 }
 
 void
-tl_free_str_arr (char **split_str) {
+tl_free_str_arr(char **split_str) {
 
 	for (size_t i = 0; split_str[i] != NULL; i++) {
-		tl_free (split_str[i]);
+		tl_free(split_str[i]);
 	}
-	tl_free (split_str);
+	tl_free(split_str);
 
 	return;
 }

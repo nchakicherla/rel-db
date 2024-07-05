@@ -7,6 +7,6 @@
 #include "nc_memory.h"
 
 char *
-tl_new_str_from_file (char *name);
+tl_new_str_from_file(char *name);
 
 #endif // NVC_FILE_H
