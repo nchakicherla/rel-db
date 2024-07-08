@@ -18,17 +18,19 @@ char *TEST_LABELS[] =
 {
 	"Name",
 	"Age",
+	"GPA",
 	NULL
 };
 
 int main(void) {
 
-	struct TL_Table *tab = tl_tab_new("Table1", "STR ITR32", 2, TL_NO_PRIMARY);
+	struct TL_Table *tab = tl_tab_new("Table1", "STR ITR32 FLT", 3, TL_NO_PRIMARY);
 	tl_tab_set_labels(tab, TEST_LABELS);
 
 	size_t a = 0;
 	while (a < UINT16_MAX) {
-		tl_tab_insert_row(tab, "Naveen,28", false);
+		int ret = tl_tab_insert_row(tab, "Naveen,28,3.14e-10", false);
+		printf("ret: %d\n", ret); // print ret in case of failure
 		a++;
 	}
 

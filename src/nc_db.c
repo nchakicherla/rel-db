@@ -82,8 +82,7 @@ char *TYPE_NAME_LITERALS[] =
 	"CURR",
 	"CH",
 	// pending implement
-	"REF",
-	NULL
+	"REF"
 };
 
 const size_t TYPE_SIZES_BYTES[] = 
@@ -101,7 +100,7 @@ const size_t TYPE_SIZES_BYTES[] =
 	sizeof(tl_ref)
 };
 
-typedef struct Mara_Double 
+typedef struct Mara_Float 
 { // taken from my mara library
 	double val;
 	int frac_digs;
@@ -171,7 +170,7 @@ mara_new_parsed_float(char *str) { // taken from my mara library
 	    return NULL;
 	}
 
-	mara_fltR parsed_flt = tl_calloc(1, sizeof(struct Mara_Double));
+	mara_fltR parsed_flt = tl_calloc(1, sizeof(struct Mara_Float));
 
 	parsed_flt->val = val;
 	parsed_flt->frac_digs = frac_digs;
