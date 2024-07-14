@@ -14,6 +14,13 @@
 #include "nc_db.h"
 #include "nc_csv.h"
 
+#ifdef _WIN32
+#include <conio.h>
+#else
+#include <stdio.h>
+#define clrscr() printf("\033[1;1H\033[2J") // use \033 in place of \e due to error
+#endif
+
 char *TEST_LABELS[] = 
 {
 	"Name",
@@ -28,8 +35,9 @@ int main(void) {
 	tl_tab_set_labels(tab, TEST_LABELS);
 
 	size_t a = 0;
+	int ret = 0;
 	while (a < UINT16_MAX) {
-		int ret = tl_tab_insert_row(tab, "Naveen,28,3.14e-10", false);
+		ret = tl_tab_insert_row(tab, "Naveen,28,3.14e-12", false);
 		printf("ret: %d\n", ret); // print ret in case of failure
 		a++;
 	}
@@ -43,6 +51,8 @@ int main(void) {
 	printf("str: %s, hash: %u\n", "test2", FNV_1a_hash("test2"));
 	printf("str: %s, hash: %u\n", "test3", FNV_1a_hash("test3"));
 	printf("str: %s, hash: %u\n", "test4", FNV_1a_hash("test4"));
+
+	//clrscr();
 
 	return 0;
 }
