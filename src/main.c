@@ -53,6 +53,28 @@ int main(void) {
 	printf("str: %s, hash: %u\n", "test4", FNV_1a_hash("test4"));
 
 	//clrscr();
+	printf ("reading csv...\n");
+	struct TL_CSV *csvR = tl_new_csv ("./resources/kaggle/netflix_titles.csv");
+
+	if (csvR) {
+		printf ("csv read!\n");
+
+		struct TL_Table *tableR_csv = tl_tab_new ("CSV Table", NULL, tl_csv_get_col_count (csvR), TL_NO_PRIMARY);
+
+		for (size_t i = 0; i < 1; i++) {
+			printf ("%zu\n", i);
+			tl_tab_load_from_csv (tableR_csv, csvR);
+		}
+
+		tl_print_table (tableR_csv);
+
+		tl_tab_print_info (tableR_csv);
+
+		tl_tab_free (&tableR_csv);
+		tl_free_csv (&csvR);
+	} else {
+		printf ("couldn't read csv!\n");
+	}
 
 	return 0;
 }

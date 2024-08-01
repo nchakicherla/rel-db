@@ -189,7 +189,7 @@ mara_new_parsed_float(char *str) { // taken from my mara library
 	if (sig_figs > MAX_FLT_SIG_FIGS) { 
     	return NULL;
 	}
-	
+
 	// limit overall float value + / -
 	if(val > MAX_FLT_VAL || val < MIN_FLT_VAL) {
 	    return NULL;
@@ -885,7 +885,12 @@ tl_tab_print_info(tl_tabR table) {
 
 	printf("schema (column label : type) : \n[ ");
 	for (size_t i = 0; i < table->n_cols; i++) {
-		printf("%s : ", table->col_labels[i]);
+		if (table->col_labels[i]) {
+			printf("%s", table->col_labels[i]);
+		} else {
+			printf("[nil]");
+		}
+		printf(" : ");
 		printf("%s, ", TYPE_NAME_LITERALS[table->schema[i]]);
 	}
 	printf("]\n");
