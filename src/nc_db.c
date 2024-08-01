@@ -10,6 +10,7 @@
 #define MAX_FLT_FRAC_DIGS  30
 #define MAX_FLT_SIG_FIGS  15
 #define MAX_FLT_VAL  1e20
+#define MIN_FLT_VAL  -1e20
 
 bool input_valid_ptrs_set = false;
 bool write_field_ptrs_set = false;
@@ -110,34 +111,34 @@ typedef struct Mara_Float
 mara_fltR 
 mara_new_parsed_float(char *str) { // taken from my mara library
 
-	size_t len = tl_str_len(str);
-
+	const size_t len = tl_str_len(str);
+	// check for any illegal characters
 	for (size_t i = 0; i < len; i++) {
 		if (!isdigit(str[i]) && str[i] != '.' && str[i] != 'e' && str[i] != '-') {
 			return NULL;
 		}
 	}
-
+	// parse using strtod
 	char *end_ptr = str;
 	double val = strtod(str, &end_ptr);
 	int frac_digs = 0;
-
+	// return NULL if strtod fails by checking end_ptr
 	if (end_ptr == str) {
 		return NULL;
 	}
-
+	// search for first e and decimal character
 	char *e_loc = tl_str_chr(str, 'e', len);
 	char *dec_loc = tl_str_chr(str, '.', len);
 
-	if (dec_loc) {
-	    if (*(dec_loc + 1) != '\0') { // check for second decimal
+	if (dec_loc) { // if decimal present
+	    if (*(dec_loc + 1) != '\0') { // check for second decimal if decimal isn't last character
 	        if (tl_str_chr(dec_loc + 1, '.', len - (size_t)(dec_loc - str + 1))) {
 	            return NULL;
 	        }
 	    }
 	}
-	if (e_loc) {
-	    if (*(e_loc + 1) != '\0') {
+	if (e_loc) { // if e present
+	    if (*(e_loc + 1) != '\0') { // check for second e if e isn't last character
 	        if (tl_str_chr(e_loc + 1, 'e', len - (size_t)(e_loc - str + 1))) {
 	            return NULL;
 	        }            
@@ -152,21 +153,45 @@ mara_new_parsed_float(char *str) { // taken from my mara library
 	        while (*(it - 1) != '.') {
 	            it--;
 	            frac_digs++;
-	        }
+	        } // iterate frac_digs for each digit between e and decimal, if decimal present
 	    }
-	    frac_digs += (int) strtol(e_loc + 2, NULL, 10);
+	    // add to frac_digs num of digits returned by strtol when called upon the exponent
+	    frac_digs += (int) strtol(e_loc + 2, NULL, 10); // not sure why this is 2 instead of 1...
 
 	} else if (!e_loc && dec_loc) {
-	    frac_digs += (len - (int)(dec_loc - str + 1));
-	}
+	    // frac_digs += (len - (int)(dec_loc - str + 1));
 
+		// if no e but '.', add to frac_digs the number of digits before decimal
+	    frac_digs += ( (len - 1) - (int)(dec_loc - str));
+	}
+	//
+	//// validate precision based on some rough testing
+	//
+
+	// frac_digs is # of digits in exponent and before decimal if either is present
+	// (# of total digits if number is written literally)
 	if(frac_digs > MAX_FLT_FRAC_DIGS) {
 	    return NULL;
 	}
-	if(e_loc != NULL && (size_t)(e_loc - str) - 1 > MAX_FLT_SIG_FIGS) {
-	    return NULL;
+
+	// sig_figs is total length of non-exponent
+	size_t sig_figs = 0;
+	if(e_loc != NULL) {
+
+		sig_figs = (size_t)(e_loc - str);
+
+		if (dec_loc) {
+			sig_figs--;
+		}
+	} else if (!e_loc && dec_loc) {
+		sig_figs = len - 1;
 	}
-	if(val > MAX_FLT_VAL) {
+
+	if (sig_figs > MAX_FLT_SIG_FIGS) { 
+    	return NULL;
+	}
+	// limit overall float value + / -
+	if(val > MAX_FLT_VAL || val < MIN_FLT_VAL) {
 	    return NULL;
 	}
 
