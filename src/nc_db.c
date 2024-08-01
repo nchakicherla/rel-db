@@ -176,20 +176,20 @@ mara_new_parsed_float(char *str) { // taken from my mara library
 
 	// sig_figs is total length of non-exponent
 	size_t sig_figs = 0;
+
 	if(e_loc != NULL) {
-
 		sig_figs = (size_t)(e_loc - str);
+	} else {
+		sig_figs = len;
 
-		if (dec_loc) {
-			sig_figs--;
-		}
-	} else if (!e_loc && dec_loc) {
-		sig_figs = len - 1;
 	}
-
+	if (dec_loc) {
+		sig_figs--;
+	}
 	if (sig_figs > MAX_FLT_SIG_FIGS) { 
     	return NULL;
 	}
+	
 	// limit overall float value + / -
 	if(val > MAX_FLT_VAL || val < MIN_FLT_VAL) {
 	    return NULL;
