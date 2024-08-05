@@ -1,0 +1,6 @@
+fn test_fn () int {
+	test_value = 4;
+	test_value2 = test_value + 1;
+	print(test_value2);
+
+}
