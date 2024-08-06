@@ -1,4 +1,10 @@
-#ifndef NVC_COMMON_H
-#define NVC_COMMON_H
+#ifndef NC_COMMON_H
+#define NC_COMMON_H
 
-#endif // NVC_COMMON_H
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#define DEBUG_TRACE_EXECUTION
+
+#endif // NC_COMMON_H

@@ -1,5 +1,5 @@
-#ifndef NVC_TREE_H
-#define NVC_TREE_H
+#ifndef NC_TREE_H
+#define NC_TREE_H
 
 #include "nc_db.h"
 
@@ -9,4 +9,4 @@ typedef struct TL_Tree_Node {
 
 } tl_tnode;
 
-#endif // NVC_TREE_H
+#endif // NC_TREE_H

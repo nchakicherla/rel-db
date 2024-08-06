@@ -1,6 +1,5 @@
 fn test_fn () int {
-	test_value = 4;
-	test_value2 = test_value + 1;
-	print(test_value2);
-
+	var test_value = 4;
+	var test_value2 = test_value + 1;
+	var print_ret = print(test_value2);
 }

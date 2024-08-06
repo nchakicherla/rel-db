@@ -1,5 +1,5 @@
-#ifndef NVC_ERROR_H
-#define NVC_ERROR_H
+#ifndef NC_ERROR_H
+#define NC_ERROR_H
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -25,4 +25,4 @@ tl_new_message(int32_t code, char* msg, char* fn);
 void
 tl_free_message(tl_msgR *tl_msgRR);
 
-#endif // NVC_ERROR_H
+#endif // NC_ERROR_H

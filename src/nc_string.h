@@ -1,5 +1,5 @@
-#ifndef NVC_STRING_H
-#define NVC_STRING_H
+#ifndef NC_STRING_H
+#define NC_STRING_H
 
 #include <stddef.h>
 #include <stdio.h>
@@ -46,4 +46,4 @@ tl_new_str_arr_safety(char *str, char *delim, char *safety, size_t *count);
 void
 tl_free_str_arr(char **split_str);
 
-#endif // NVC_STRING_H
+#endif // NC_STRING_H

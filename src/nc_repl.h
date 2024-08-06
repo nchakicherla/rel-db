@@ -1,5 +1,5 @@
-#ifndef NVC_INTERPRETER_H
-#define NVC_INTERPRETER_H
+#ifndef NC_INTERPRETER_H
+#define NC_INTERPRETER_H
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -23,4 +23,4 @@ typedef struct TL_Token {
 tl_tokR
 tl_new_tok (tl_tok_type type, void *data);
 
-#endif // NVC_INTERPRETER_H
+#endif // NC_INTERPRETER_H

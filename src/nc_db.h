@@ -1,5 +1,5 @@
-#ifndef NVC_DB_H
-#define NVC_DB_H
+#ifndef NC_DB_H
+#define NC_DB_H
 
 //#include <stdint.h>
 #include <inttypes.h>
@@ -52,4 +52,4 @@ tl_tab_load_from_csv(struct TL_Table *tl_tabR, struct TL_CSV *csvR);
 void
 tl_tab_print_info(struct TL_Table *tableR);
 
-#endif // NVC_DB_H
+#endif // NC_DB_H

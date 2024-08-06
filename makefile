@@ -17,6 +17,10 @@ OBJS = 	./obj/nc_memory.o \
 		./obj/nc_db.o \
 		./obj/nc_csv.o \
 		./obj/nc_hashmap.o \
+		./obj/nc_scanner.o \
+		./obj/nc_chunk.o \
+		./obj/nc_vm.o \
+		./obj/nc_debug.o
 
 default: reset $(BIN)
 ifeq ($(OS),Darwin) 

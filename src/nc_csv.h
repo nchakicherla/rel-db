@@ -1,5 +1,5 @@
-#ifndef NVC_CSV_H
-#define NVC_CSV_H
+#ifndef NC_CSV_H
+#define NC_CSV_H
 
 #include <stdlib.h>
 
@@ -27,4 +27,4 @@ tl_csv_get_row_addr(struct TL_CSV *tl_csvR, size_t ind);
 void 
 teal_debug_print_csv_info (tl_csvR csv);
 */
-#endif // NVC_CSV_H
+#endif // NC_CSV_H
